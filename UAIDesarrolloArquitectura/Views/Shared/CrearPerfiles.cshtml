@@ -1,0 +1,377 @@
+﻿@model UAIDesarrolloArquitectura.Models.ViewModel.CrearPerfilViewModel
+@using Services.Models
+
+<!DOCTYPE html>
+
+<html>
+@{
+    ViewBag.Title = "CrearPerfiles";
+    Services.Idioma.Translator translator = new Services.Idioma.Translator();
+    UAIDesarrolloArquitectura.Controllers.IdiomaController lC = new UAIDesarrolloArquitectura.Controllers.IdiomaController();
+    lC.InitializeController();
+    Services.LanguageService service = lC.GetService();
+    service.Susbcribe(translator);
+    if (Services.SessionManager.IsLogged())
+    {
+        service.ChangeLanguage((Services.SessionManager.GetInstance.User.LanguageId).ToString());
+    }
+    else
+    {
+        if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); }
+    }
+}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creación de Perfiles</title>
+    <link rel="stylesheet" href="~/Content/Site.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        ul.tree, ul.tree ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+            ul.tree ul {
+                margin-left: 20px;
+                display: block; /* Ocultar los subelementos inicialmente */
+            }
+
+        li.Role {
+            margin: 5px 0;
+            text-align: left;
+        }
+
+            li.Role::before {
+                content: '▶'; /* Símbolo para indicar que hay elementos anidados */
+                display: inline-block;
+                cursor: pointer;
+                margin-right: 5px;
+            }
+
+            li.Role.open::before {
+                content: '▼'; /* Símbolo para elementos expandidos */
+            }
+
+        li.Permission {
+            margin: 5px 0;
+            text-align: left;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .form-container {
+            margin: 20px;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px
+        }
+
+        select,
+        input[type="text"] {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="button"] {
+            width: auto;
+            padding: 10px;
+            background-color: #2d53fd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            input[type="button"]:hover {
+                background-color: #5270fa;
+            }
+
+        .container-tree {
+            width: 300px;
+            height: 400px;
+            background-color: white;
+            border: 2px solid #ccc;
+            padding: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="barra">
+        @if (Services.SessionManager.IsLogged())
+        {
+            <div class="opciones">
+                <a href="@Url.Action("Logout", "Home")">@translator.GetTraduction(service, "Logout")</a>
+                <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
+                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora", "Bitacora")">@translator.GetTraduction(service, "Log")</a>
+                <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios", "ABM")">@translator.GetTraduction(service, "ManageUser")</a>
+                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore", "Backup")">@translator.GetTraduction(service, "Restoredb")</a>
+                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma", "Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
+                <a style="display:none;" id="crearperfiles" href="#">@translator.GetTraduction(service, "CreateProfile")</a>
+                <a style="display:none;" id="asignarperfiles" href="@Url.Action("AsignarPerfil", "AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
+                <script type="text/javascript">
+                 @foreach (string permission in Services.SessionManager.GetInstance.User.permissionList)
+                 {
+                     <text>
+                         document.getElementById('@permission').style.display = 'block';
+                     </text>
+                 }
+                </script>
+                <a href="@Url.Action("Carrito", "Carrito")">@translator.GetTraduction(service, "Cart")</a>
+            </div>
+            <div class="opciones">
+                <img src="~/assets/user-image-with-black-background-svgrepo-com.svg" width="30px" />
+                <p style='color: black; white-space: nowrap;'>@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p>
+            </div>
+        }
+        else
+        {
+            <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Login")</a>
+        }
+        <form>
+            <select id="option" onchange="enviarValor()">
+                @foreach (Services.Idioma.Language l in service.GetLanguages())
+                {
+
+                    if (service.SelectedLanguage.Id == l.Id)
+                    {
+                        <option value="@l.Id" selected="selected">@translator.GetTraduction(service, l.Name)</option>
+                    }
+
+                    else
+                    {
+                        <option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>
+                    }
+                }
+            </select>
+        </form>
+    </nav>
+    <header>
+        <h1>Bersonal</h1>
+    </header>
+    <nav>
+        <a @Url.Action("Index", "Home")>Internet</a>
+        <a href="https://es.euronews.com/noticias/internacional">@translator.GetTraduction(service, "Store")</a>
+        <a href="https://es.euronews.com/business">@translator.GetTraduction(service, "Portability")</a>
+        <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
+        <a href="https://es.euronews.com/green">TV</a>
+    </nav>
+    <div class="container">
+        <div class="form-container">
+            <div class="form-item">
+                <h5>@translator.GetTraduction(service, "Roles")</h5>
+                <select id="selRole">
+                    @foreach (var role in Model.Roles)
+                    {
+                        <option>@role.Name</option>
+                    }
+                </select>
+                <input id="btnAgregarRol" type="button" value="Agregar Rol" />
+            </div>
+            <div class="form-item">
+                <h5>@translator.GetTraduction(service, "Permissions")</h5>
+                <select id="selPermission">
+                    @foreach (var permiso in Model.Permisos)
+                    {
+                        <option value="@permiso.Id">@permiso.Name</option>
+                    }
+                </select>
+                <input id="btnAgregarPermiso" type="button" value="@translator.GetTraduction(service, "AddPermission")" />
+            </div>
+            <div class="form-item">
+                <h5>@translator.GetTraduction(service, "ProfileName"):</h5>
+                <input id="txtNombrePerfil" type="text" />
+                <br />
+                <input id="btnAgregarPerfil" type="button" value="@translator.GetTraduction(service, "AddProfile")" />
+            </div>
+        </div>
+        <div class="container-tree">
+            <ul id="arbol" class="tree">
+                <li id="liPerfil" class="Role" style="display:none">
+
+                </li>
+            </ul>
+        </div>
+        <input id="crearPerfil" type="button" value="@translator.GetTraduction(service, "CreateProfile2")" />
+    </div>
+    <script>
+        let liProfileName = document.getElementById("liPerfil")
+        let nombreperfil
+        function expandNode(node) {
+            node.style.display = 'block'
+        }
+        function colapseNode(node) {
+            node.style.display = 'none'
+        }
+        // Función para alternar la visibilidad de las sublistas
+        function alternateSubListVisibility(click)
+        {
+            click.stopPropagation() // Evitar que el clic en los hijos cierre el padre
+            this.classList.toggle('open')
+            let childList = this.querySelector('ul')
+            if (childList)
+            {
+                if (childList.style.display != 'none')
+                {
+                    console.log("colapsar")
+                    colapseNode(childList)
+                }
+                else
+                {
+                    console.log("expandir")
+                    expandNode(childList)
+                }
+            }
+        }
+        // Asignar la función de alternar a cada elemento de la lista
+        function assignClickEvents() {
+            document.querySelectorAll('ul.tree li').forEach(function (li) {
+                // TO DO: colapsar y expandir solo cuando se clickea el icono
+                li.addEventListener('click', alternateSubListVisibility)
+            })
+        }
+
+        assignClickEvents();
+        function permissionExists(permissionText) {
+            const permissions = document.querySelectorAll('ul.tree li')
+            let exists = false
+            permissions.forEach(permission => {
+                if (permission.textContent === permissionText) {
+                    exists = true
+                }
+            });
+            return exists;
+        }
+        //Agregar perfil al arbol
+        const btnAgregarPerfil = document.getElementById("btnAgregarPerfil")
+        btnAgregarPerfil.addEventListener('click', () => {
+            nombreperfil = document.getElementById("txtNombrePerfil").value
+            if (nombreperfil == "")
+            {
+                alert("Debe darle un nombre al perfil!!")
+            }
+            else
+            {
+                liProfileName.style.display = 'block'
+                liProfileName.innerText = nombreperfil
+            }
+        })
+
+        const btnAddPermission = document.getElementById("btnAgregarPermiso")
+        btnAddPermission.addEventListener('click', function () { add('Permission') })
+
+        const btnAddRole = document.getElementById("btnAgregarRol")
+        btnAgregarRol.addEventListener('click', function () { add('Role') })
+
+        function add(auth) {
+            const selAuth = document.getElementById(`sel${auth}`)
+            let selectedAuthText = selAuth.options[selAuth.selectedIndex].text
+            let exists = false
+            exists = permissionExists(selectedAuthText)
+            if (liProfileName.style.display != "none")
+            {
+                if (!exists)
+                {
+                    let liAuth = document.createElement("li")
+                    liAuth.textContent = selectedAuthText
+                    let ulAuth
+                    if (!liProfileName.querySelector('ul')) {
+                        ulAuth = document.createElement('ul')
+                        liProfileName.appendChild(ulAuth)
+                    } else {
+                        ulAuth = liProfileName.querySelector('ul')
+                    }
+                    liAuth.className = auth
+                    ulAuth.appendChild(liAuth)
+                    let liPermission;
+                    if (auth == 'Role') {
+                        @foreach(Services.Perfiles.Role role in Model.Roles)
+                        {
+                             <text>
+                             if (auth === '@role.Name')
+                             {
+                                 @foreach (var child in role.Children)
+                                  {
+                                     <text>
+                                 children = '@child.Name';
+                                 ulRole = document.createElement("ul")
+                                 liAuth.appendChild(ulRole)
+                                           liPermission = document.createElement("li")
+                                           liPermission.textContent = children
+                                           liPermission.className = 'Permission'
+                                           ulRole.appendChild(liPermission)
+                                     </text>
+                                  }
+
+                             }
+                            </text>
+                        }
+                    }
+                }
+                else alert("Este permiso ya existe")
+            }
+            else alert("No se creó el perfil")
+        }
+
+        document.getElementById('crearPerfil').addEventListener('click', enviarPerfil);
+
+        function enviarPerfil() {
+
+            const permisos = [];
+            document.querySelectorAll('ul.tree ul li').forEach(item => {
+                permisos.push({ nombre: item.textContent.trim() });
+            });
+
+            const perfilData = {
+                nombrePerfil: nombreperfil,
+                permisos: permisos
+            };
+            console.log(perfilData);
+            fetch('/CrearPerfiles/GuardarPerfil', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(perfilData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Error en la solicitud: " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert("Perfil creado exitosamente!");
+                    } else {
+                        alert("Hubo un problema al crear el perfil: " + data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+    </script>
+    <script src="~/Scripts/scriptIdioma.js"></script>
+</body>
+</html>

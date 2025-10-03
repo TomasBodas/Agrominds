@@ -1,0 +1,139 @@
+﻿@using Services.Models
+@model List<string>
+<!DOCTYPE html>
+<html lang="es">
+@{
+    ViewBag.Title = "CorruptDatabaseMessage";
+    Services.Idioma.Translator translator = new Services.Idioma.Translator();
+    UAIDesarrolloArquitectura.Controllers.IdiomaController lC = new UAIDesarrolloArquitectura.Controllers.IdiomaController();
+    lC.InitializeController();
+    Services.LanguageService service = lC.GetService();
+    service.Susbcribe(translator);
+    if (Services.SessionManager.IsLogged())
+    {
+        service.ChangeLanguage((Services.SessionManager.GetInstance.User.LanguageId).ToString());
+    }
+    else
+    {
+        if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); }
+    }
+}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advertencia</title>
+    <link rel="stylesheet" href="~/Content/Site.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        a, input[type="submit"] {
+            background-color: rgb(30, 100, 196);
+            color: white;
+            border-radius: 5px;
+            padding: 5px;
+            border-style: none;
+            text-decoration: none;
+            font-family: "Chivo", Arial, sans-serif;
+            font-size: 14px;
+        }
+            a, input[type="submit"]:hover {
+                background-color: #0056b3;
+            }
+        input[type="text"] {
+            width: 300px;
+            border-style: none;
+            border-radius: 5px;
+            padding: 5px;
+            background-color: #dddddd;
+        }
+        .contenedor-botones-restore {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            padding: 8px;
+            border-radius: 5px;
+            background-color: white;
+        }
+
+        .contenedor-botones {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="centered-div">
+        <div class="message">
+            @if (Services.SessionManager.GetInstance != null && Services.SessionManager.GetInstance.User.Name=="webmaster")
+            {
+                <p>@translator.GetTraduction(service, "Corruptdb").</p>
+                <p> @translator.GetTraduction(service, "ErrorList"): </p>
+                <ul>
+                    @if (Model != null)
+                    {
+                        foreach (var error in Model)
+                        {
+                            <li>@error</li>
+                        }
+                    }
+                </ul>
+                <p>@translator.GetTraduction(service, "Howtoproceed")</p>
+                <div class="contenedor-botones">
+                    <form action="/Backup/Restore" method="post">
+                        <div class="contenedor-botones-restore">
+                            <input type="hidden" name="ReturnUrl" value="@Url.Action("CorrupDatabaseMessage")" />
+                            <input type="text" name="path" placeholder="@translator.GetTraduction(service, "Corruptdb")" required />
+                            <br />
+                            <input type="submit" value="Restaurar" />
+                        </div>
+                    </form>
+                    @*Si en el diccionario existe una entrada con la clave isSuccess*@
+                    @if (TempData["IsSuccess"] != null)
+                    {
+                        <script type="text/javascript">
+                        let isSuccess = @TempData["IsSuccess"].ToString().ToLower();
+                        if (isSuccess)
+                        {
+                            //Mostramos un mensaje confirmandolo
+                            alert(@translator.GetTraduction(service, "BackupSuccess"));
+                            //Llamamos a la vista login
+                            window.location.href = '@Url.Action("Login", "Login")';
+                        }
+                        //Si se pudo hacer
+                        else
+                        {
+                            //Mostramos un mensaje confirmandolo y nos quedamos acá
+                            alert(@translator.GetTraduction(service, "BackupFail"))
+                        }
+                        </script>
+                    }
+                    <div>
+                        @if (ViewData["SetCheckDigitsIsSuccess"] != null)
+                        {
+                            <script type="text/javascript">
+                                alert(@translator.GetTraduction(service, "CalculateDigitSuccess"));
+                                window.location.href = '@Url.Action("Login", "Login")';
+                            </script>
+
+                        }
+                    <a href="@Url.Action("SetCheckDigits", "Backup")">@translator.GetTraduction(service, "CalculateDigit")</a>
+                    </div>
+                    <div>
+                        <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Leave")</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p> @translator.GetTraduction(service, "CalculateDigitSuccess").</p>
+                <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Leave")</a>
+            }
+        </div>
+    </div>
+</body>
+</html>

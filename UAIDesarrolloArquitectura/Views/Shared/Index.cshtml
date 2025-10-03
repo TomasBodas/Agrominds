@@ -1,0 +1,121 @@
+﻿@using Services.Models
+@model List<string>
+<!DOCTYPE html>
+<html lang="es">
+@{
+    ViewBag.Title = "Index";
+    Services.Idioma.Translator translator = new Services.Idioma.Translator();
+    UAIDesarrolloArquitectura.Controllers.IdiomaController lC = new UAIDesarrolloArquitectura.Controllers.IdiomaController();
+    lC.InitializeController();
+    Services.LanguageService service = lC.GetService();
+    service.Susbcribe(translator);
+    if (Services.SessionManager.IsLogged())
+    {
+        service.ChangeLanguage((Services.SessionManager.GetInstance.User.LanguageId).ToString());
+    }
+    else
+    {
+        if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); }
+    }
+}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>personal</title>
+    <link rel="stylesheet" href="~/Content/Site.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+</head>
+
+
+<body>
+    <nav class="barra">
+        @if (Services.SessionManager.IsLogged())
+        {
+            <div id="opciones" class="opciones">
+                <a href="@Url.Action("Logout", "Home")">@translator.GetTraduction(service, "Logout")</a>
+                <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
+                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora", "Bitacora")">@translator.GetTraduction(service, "Log")</a>
+                <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios", "ABM")">@translator.GetTraduction(service, "ManageUser")</a>
+                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore", "Backup")">@translator.GetTraduction(service, "Restoredb")</a>
+                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma", "Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
+                <a style="display:none;" id="crearperfiles" href="@Url.Action("CrearPerfiles", "CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
+                <a style="display:none;" id="asignarperfiles" href="@Url.Action("AsignarPerfil", "AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
+                <script type="text/javascript">
+                     @foreach (string permission in Services.SessionManager.GetInstance.User.permissionList)
+                     {
+                         <text>
+                             document.getElementById('@permission').style.display = 'block';
+                         </text>
+                     }
+                </script>
+                <a href="@Url.Action("Carrito", "Carrito")">@translator.GetTraduction(service, "Cart")</a>
+            </div>
+            <div class="opciones">
+                <img src="~/assets/user-image-with-black-background-svgrepo-com.svg" width="30px" />
+                <p style='color: black; white-space: nowrap;'>@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p>
+            </div>
+
+        }
+        else
+        {
+            <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Login")</a>
+            <a href="@Url.Action("Register", "Register")">@translator.GetTraduction(service, "Register")</a>
+        }
+        <form>
+            <select id="option" onchange="enviarValor()">
+                @foreach (Services.Idioma.Language l in service.GetLanguages())
+                {
+
+                        if (service.SelectedLanguage.Id == l.Id)
+                        {
+                            <option value="@l.Id" selected="selected">@translator.GetTraduction(service, l.Name)</option>
+                        }
+ 
+                    else                
+                    {
+                     <option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>
+                    }                  
+                }
+            </select>
+        </form>
+    </nav>
+    <header>
+        <h1>Agrominds</h1>
+    </header>
+    <nav>
+        <a href="/pages/contacto.html">Robots</a>
+        <a href="https://es.euronews.com/noticias/internacional">@translator.GetTraduction(service, "Store")</a>
+        <a href="https://es.euronews.com/business">@translator.GetTraduction(service, "Portability")</a>
+        <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
+        <a href="https://es.euronews.com/green">Contacto</a>
+    </nav>
+    <div class="container">
+        <div class="container">
+            <div id="descripcion">
+                <h2>
+                    @translator.GetTraduction(service, "Promo1")
+                </h2>
+                <p><b>Internet 100 MB + Flow Flex</b></p>
+                <p>
+                    @translator.GetTraduction(service, "Promo2text")
+                </p>
+                <p>@translator.GetTraduction(service, "Promo3title")</p>
+                <p>
+                    @translator.GetTraduction(service, "Promo3text")
+                </p>
+            </div>
+            <div class="centered-div">
+                <img src="~/assets/robots.png" alt="AgroMinds Logo" style="max-width: 300px; height: auto; border-radius: 10px;">
+            </div>
+        </div>
+    </div>
+    <footer>
+        Copyright © Agrominds 2026
+    </footer>
+    <script src="~/Scripts/scriptIdioma.js"></script>
+</body>
+</html>

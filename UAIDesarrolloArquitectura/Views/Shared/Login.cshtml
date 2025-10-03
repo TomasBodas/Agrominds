@@ -1,0 +1,122 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+@model UAIDesarrolloArquitectura.Models.ViewModel.LoginViewModel
+@{ 
+    ViewBag.Title = "Login";
+    Services.Idioma.Translator translator = new Services.Idioma.Translator();
+    UAIDesarrolloArquitectura.Controllers.IdiomaController lC = new UAIDesarrolloArquitectura.Controllers.IdiomaController();
+    lC.InitializeController();
+    Services.LanguageService service = lC.GetService();
+    service.Susbcribe(translator);
+    if (Services.SessionManager.IsLogged())
+    {
+        service.ChangeLanguage((Services.SessionManager.GetInstance.User.LanguageId).ToString());
+    }
+    else
+    {
+        if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); }
+    }
+}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .login-container {
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: COLUMN;
+        }
+
+            .login-container h2 {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .login-container input {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                box-sizing: border-box;
+            }
+
+            .login-container button {
+                width: 100%;
+                padding: 10px;
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+                .login-container button:hover {
+                    background-color: #0056b3;
+                }
+            .login-container a {
+                text-decoration: none;
+                color: #0056b3;
+                text-align: center;
+            }
+        .validation-error {
+            display: none;
+            color: red;
+            font-weight: bold;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size:15px;
+        }
+        .field-validation-error {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    @using (Html.BeginForm("Login", "Login", FormMethod.Post))
+    {
+<div class="login-container">
+    <a href="@Url.Action("Index", "Home")"><img src="~/assets/Bersonal.png" width="200" style="margin:auto; cursor:pointer"></a>
+    <form id="login-form">
+        <div>
+            @Html.LabelFor(m => m.Email)
+            @Html.TextBoxFor(m => m.Email, new { @type = "Email", @placeholder = "Email", @required = "required" })
+            @Html.ValidationMessageFor(m => m.Email)
+        </div>
+        <div>
+            @Html.LabelFor(m => m.Password)
+            @Html.PasswordFor(m => m.Password, new { @placeholder = @translator.GetTraduction(service, "Password"), @required = "required" })
+            @Html.ValidationMessageFor(m => m.Password)
+        </div>
+        @Html.ValidationMessage("MissingUser", new { @class = "validation-error" })
+    <button type="submit">@translator.GetTraduction(service, "Login")</button>
+        <br />
+        @Html.ActionLink("Registrarse", "Register", "Register")
+    </form>
+</div>}
+</body>
+</html>
+
+

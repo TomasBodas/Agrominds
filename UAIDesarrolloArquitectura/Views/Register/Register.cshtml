@@ -1,0 +1,94 @@
+﻿
+@{
+    ViewBag.Title = "Register";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .login-container {
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+            .login-container h2 {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .login-container input {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                box-sizing: border-box;
+            }
+
+            .login-container button {
+                width: 100%;
+                padding: 10px;
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+                .login-container button:hover {
+                    background-color: #0056b3;
+                }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Register</h2>
+        @using (Html.BeginForm("Register", "Register", FormMethod.Post))
+        {
+            <div>
+                <input type="text" name="name" placeholder="Nombre" required />
+            </div>
+            <div>
+                <input type="text" name="surname" placeholder="Apellido" required />
+            </div>
+            <div>
+                <input type="number" name="DNI" placeholder="DNI" required max="99999999"/>
+            </div>
+            <div>
+                <input type="email" name="Email" placeholder="Email" required />
+            </div>
+            <div>
+                <input type="password" name="Password" placeholder="Contraseña" required />
+            </div>
+            <div>
+                <input type="password" name="ConfirmPassword" placeholder="Repetir Contraseña" required />
+                @Html.ValidationMessage("ConfirmPassword")
+            </div>
+            <div>
+                <button type="submit">Registrarse</button>
+            </div>
+        }
+    </div>
+</body>
+</html>
+
+

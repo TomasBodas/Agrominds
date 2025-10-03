@@ -1,0 +1,154 @@
+﻿
+@{
+    ViewBag.Title = "BackupRestore";
+    Services.Idioma.Translator translator = new Services.Idioma.Translator();
+    UAIDesarrolloArquitectura.Controllers.IdiomaController lC = new UAIDesarrolloArquitectura.Controllers.IdiomaController();
+    lC.InitializeController();
+    Services.LanguageService service = lC.GetService();
+    service.Susbcribe(translator);
+    if (Services.SessionManager.IsLogged())
+    {
+        service.ChangeLanguage((Services.SessionManager.GetInstance.User.LanguageId).ToString());
+    }
+    else
+    {
+        if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); }
+    }
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/Content/Site.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>@translator.GetTraduction(service, "Restoredb")</title>
+    <style>
+        .contenedor-backup-restore {
+            margin: 150px auto;
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+        .boton {
+            padding: 10px;
+            background-color: rgb(30, 100, 196);
+            color: white;
+            border-style: none;
+            width: 180px;
+            font-size: 14px;
+            font-family: "Chivo", Arial, sans-serif;
+            text-decoration:none;
+        }
+            .boton:hover {
+                background-color: rgb(34, 124, 222);
+                cursor: pointer;
+            }
+        .contenedor-botones-restore {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        input[type="text"] {
+            width: 300px;
+            border-style: none;
+            border-radius: 5px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="barra">
+        @if (Services.SessionManager.IsLogged())
+        {
+            <div class="opciones">
+                <a href="@Url.Action("Logout", "Home")">@translator.GetTraduction(service, "Logout")</a>
+                <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
+                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora", "Bitacora")">@translator.GetTraduction(service, "Log")</a>
+                <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios", "ABM")">@translator.GetTraduction(service, "ManageUser")</a>
+                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore", "Backup")">@translator.GetTraduction(service, "Restoredb")</a>
+                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma", "Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
+                <a style="display:none;" id="crearperfiles" href="@Url.Action("CrearPerfiles", "CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
+                <a style="display:none;" id="asignarperfiles" href="@Url.Action("AsignarPerfil", "AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
+                <script type="text/javascript">
+                     @foreach (string permission in Services.SessionManager.GetInstance.User.permissionList)
+                     {
+                         <text>
+                             document.getElementById('@permission').style.display = 'block';
+                         </text>
+                     }
+                </script>
+                <a href="@Url.Action("Carrito", "Carrito")">@translator.GetTraduction(service, "Cart")</a>
+            </div>
+            <div class="opciones">
+                <img src="~/assets/user-image-with-black-background-svgrepo-com.svg" width="30px" />
+                <p style='color: black; white-space: nowrap;'>@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p>
+            </div>
+        }
+        else
+        {
+    <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Login")</a>
+        }
+        <form>
+            <select id="option" onchange="enviarValor()">
+                @foreach (Services.Idioma.Language l in service.GetLanguages())
+                {
+
+                    if (service.SelectedLanguage.Id == l.Id)
+                    {
+                        <option value="@l.Id" selected="selected">@translator.GetTraduction(service, l.Name)</option>
+                    }
+
+                    else
+                    {
+                        <option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>
+                    }
+                }
+            </select>
+        </form>
+    </nav>
+    <header>
+        <h1>Bersonal</h1>
+    </header>
+    <nav>
+        <a href="/pages/contacto.html">Internet</a>
+        <a href="https://es.euronews.com/noticias/internacional">@translator.GetTraduction(service, "Store")</a>
+        <a href="https://es.euronews.com/business">@translator.GetTraduction(service, "Portability")</a>
+        <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
+        <a href="https://es.euronews.com/green">TV</a>
+    </nav>
+    <div class="contenedor-backup-restore">
+        <a class="boton" href="@Url.Action("Backup", "Backup")">@translator.GetTraduction(service, "CreateBackup")</a>
+        <form action="/Backup/Restore" method="post">
+            <div class="contenedor-botones-restore">
+                <input type="hidden" name="ReturnUrl" value="@Url.Action("BackupRestore")" />
+                <input type="text" name="path" placeholder="@translator.GetTraduction(service, "BackupRoute")" required />
+                <input class="boton" type="submit" value="@translator.GetTraduction(service, "Restore")" />
+            </div>
+        </form>
+    </div>
+    @if (TempData["IsSuccess"] != null)
+    {
+        <script type="text/javascript">
+            let isSuccess = @TempData["IsSuccess"].ToString().ToLower();
+            if (isSuccess)
+            {
+                alert(@translator.GetTraduction(service, "BackupSuccess"));
+            }
+            else
+            {
+                alert(@translator.GetTraduction(service, "BackupFail"))
+            }
+        </script>
+    }
+    <script src="~/Scripts/scriptIdioma.js"></script>
+</body>
+
+</html>
