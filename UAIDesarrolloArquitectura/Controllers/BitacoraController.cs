@@ -24,7 +24,7 @@ namespace UAIDesarrolloArquitectura.Controllers
             {
                 return RedirectToAction("Login", "Login");
             }
-            if (SessionManager.GetInstance.User.Name == "admin")
+            if (SessionManager.GetInstance.User.Name == "Administrador")
             {
                 List<Log> list = dAL_Log.getLog();
                 foreach (Log log in list)

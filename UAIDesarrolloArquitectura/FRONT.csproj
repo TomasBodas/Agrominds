@@ -175,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\Bersonal.png" />
+    <Content Include="assets\robots.png" />
     <Content Include="assets\user-image-with-black-background-svgrepo-com.svg" />
     <None Include="Connected Services\ServicePrecios\ObtPrecios.disco" />
     <None Include="Connected Services\ServicePrecios\configuration91.svcinfo" />

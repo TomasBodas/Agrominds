@@ -25,7 +25,7 @@ namespace Services
                 using (SqlConnection connection = new SqlConnection(CONNECTION_STRING))
                 {
                     connection.Open();
-                    string backupQuery = $"BACKUP Database Bersonal TO DISK = 'C:\\Users\\User\\source\\repos\\Bersonal\\Backups\\MiBackup - {DateTime.Now.ToString("yyyyMMddHHmmss")}.bak'";
+                    string backupQuery = $"BACKUP Database Bersonal TO DISK = 'D:\\backups\\MiBackup - {DateTime.Now.ToString("yyyyMMddHHmmss")}.bak'";
                     using (SqlCommand command = new SqlCommand(backupQuery, connection))
                     {
                         command.ExecuteNonQuery();

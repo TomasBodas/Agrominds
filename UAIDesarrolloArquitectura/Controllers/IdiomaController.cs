@@ -108,7 +108,7 @@ namespace UAIDesarrolloArquitectura.Controllers
                 return RedirectToAction("Login", "Login");
             }
 
-            if (SessionManager.GetInstance.User.Name == "Lucas")
+            if (SessionManager.GetInstance.User.Name == "webmaster")
             {
                 List<Language> langList = dal_language.GetLanguages();
                 Language lang = langList.Find(x => x.Id == id);

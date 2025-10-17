@@ -22,7 +22,7 @@ namespace DAL
                 try
                 {
                     connection.Open();
-                    string query = "INSERT INTO usuario (nombre, apellido, DNI, email, contrasena, Id_Perfil, idiomaId) VALUES (@Nombre, @Apellido, @DNI, @Email, @Contraseña, @IdPerfil, @idioma)";
+                    string query = "INSERT INTO usuario (nombre, apellido, DNI, email, contrasena, IdPerfil, idiomaId) VALUES (@Nombre, @Apellido, @DNI, @Email, @Contraseña, @IdPerfil, @idioma)";
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@Nombre", Name);
@@ -91,7 +91,7 @@ namespace DAL
             {
                 connection.Open();
 
-                string selectUserQuery = $"SELECT id, nombre, apellido, DNI, email, contrasena, Id_Perfil, idiomaId FROM usuario WHERE email = '{email}'";
+                string selectUserQuery = $"SELECT id, nombre, apellido, DNI, email, contrasena, IdPerfil, idiomaId FROM usuario WHERE email = '{email}'";
                 int profileId = 0;
 
                 using (SqlCommand selectUserCommand = new SqlCommand(selectUserQuery, connection))
@@ -184,9 +184,10 @@ namespace DAL
         }
         public void UpdateUser(User user)
         {
+            string emailHash = PasswordEncrypter.EncryptData(user.Email);
             using (SqlConnection connection = new SqlConnection(CONNECTION_STRING))
             {
-                string updateUserQuery = $"UPDATE usuario SET nombre='{user.Name}', apellido='{user.Surname}', DNI={user.DNI}, email='{user.Email}', idiomaid = '{user.LanguageId}' WHERE id={user.id}";
+                string updateUserQuery = $"UPDATE usuario SET nombre='{user.Name}', apellido='{user.Surname}', DNI={user.DNI}, email='{emailHash}', idiomaid = '{user.LanguageId}' WHERE id={user.id}";
                 SqlCommand updateUserQueryCommand = new SqlCommand(updateUserQuery, connection);
                 connection.Open();
                 updateUserQueryCommand.ExecuteNonQuery();
@@ -207,7 +208,7 @@ namespace DAL
                         profileID = reader.GetInt32(0);
                     }
                 }
-                query = $"UPDATE usuario SET id_perfil='{profileID}' WHERE nombre='{usuario}'";
+                query = $"UPDATE usuario SET IdPerfil='{profileID}' WHERE nombre='{usuario}'";
                 SqlCommand updateUserQueryCommand = new SqlCommand(query, connection);
                 updateUserQueryCommand.ExecuteNonQuery();
             }

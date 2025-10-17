@@ -35,6 +35,12 @@ namespace UAIDesarrolloArquitectura.Controllers
 
             return View("Plans");
         }
+
+        public ActionResult Bitacora()
+        {
+            return View("Bitacora");
+        }
+
         public ActionResult Logout()
         {
             

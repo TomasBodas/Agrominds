@@ -23,7 +23,7 @@ namespace UAIDesarrolloArquitectura.Controllers
             {
                 return RedirectToAction("Login", "Login");
             }
-            if (SessionManager.GetInstance.User.Name == "admin")
+            if (SessionManager.GetInstance.User.Name == "Administrador")
             {
                 List<User> usersList = dal_user.getUsers();
                 foreach (User user in usersList)
