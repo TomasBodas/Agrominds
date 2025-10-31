@@ -47,46 +47,46 @@
             font-family: 'Chivo', Arial, sans-serif;
         }
 
-        #cookieConsentModal a {
-            color: #BBDEFB;
-            text-decoration: underline;
-        }
+            #cookieConsentModal a {
+                color: #BBDEFB;
+                text-decoration: underline;
+            }
 
-        #cookieConsentModal .consent-content {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
+            #cookieConsentModal .consent-content {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
 
-        #cookieConsentModal p {
-            margin: 0;
-            color: #ffffff;
-        }
+            #cookieConsentModal p {
+                margin: 0;
+                color: #ffffff;
+            }
 
-        #cookieConsentModal .actions {
-            margin-left: auto;
-            display: flex;
-            gap: 8px;
-        }
+            #cookieConsentModal .actions {
+                margin-left: auto;
+                display: flex;
+                gap: 8px;
+            }
 
-        #cookieConsentModal .btn {
-            padding: 8px 12px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-        }
+            #cookieConsentModal .btn {
+                padding: 8px 12px;
+                border-radius: 4px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+            }
 
-        #cookieConsentModal .btn-accept {
-            background: #0D47A1; /* darker blue */
-            color: white;
-        }
+            #cookieConsentModal .btn-accept {
+                background: #0D47A1; /* darker blue */
+                color: white;
+            }
 
-        #cookieConsentModal .btn-decline {
-            background: rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
+            #cookieConsentModal .btn-decline {
+                background: rgba(255, 255, 255, 0.12);
+                color: #ffffff;
+                border: 1px solid rgba(255, 255, 255, 0.18);
+            }
 
         @@media (max-width: 600px) {
             #cookieConsentModal {
@@ -96,15 +96,15 @@
                 padding: 12px;
             }
 
-            #cookieConsentModal .consent-content {
-                flex-direction: column;
-                align-items: stretch;
-            }
+                #cookieConsentModal .consent-content {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
 
-            #cookieConsentModal .actions {
-                margin-left: 0;
-                justify-content: flex-end;
-            }
+                #cookieConsentModal .actions {
+                    margin-left: 0;
+                    justify-content: flex-end;
+                }
         }
     </style>
 </head>
@@ -167,21 +167,50 @@
         <a href="@Url.Action("Contact", "Home")">@translator.GetTraduction(service, "Contact")</a>
     </nav>
 
+    <main style="padding:30px20px; max-width:900px; margin:40px auto; display:flex; flex-direction:column; align-items:stretch; gap:24px;">
+        <section>
+            <h2>@translator.GetTraduction(service, "Contact")</h2>
+        </section>
 
-    <div class="container" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 40px; margin-top: 40px;">
-        <div id="descripcion" style="max-width: 500px; text-align: left; line-height: 1.6;">
-            <h2>@translator.GetTraduction(service, "Promo1")</h2>
-            <p>@translator.GetTraduction(service, "Promo2text")</p>
-            <p>@translator.GetTraduction(service, "Promo3text")</p>
-            <p>@translator.GetTraduction(service, "Promo4text")</p>
-            <p>@translator.GetTraduction(service, "Promo5text")</p>
-            <p>@translator.GetTraduction(service, "Promo6text")</p>
-        </div>
-        <div style="flex-shrink: 0;">
-            <img src="~/assets/robots.png" alt="AgroMinds Logo"
-                 style="max-width: 300px; height: auto; border-radius: 10px;">
-        </div>
-    </div>
+        <!-- CONTACT INFO CONTAINER: only this block was added/modified -->
+        <section class="contact-info" style="background: linear-gradient(180deg, #f4f9ff0%, #eaf4ff100%); border-left:4px solid #1E88E5; padding:18px; border-radius:8px; box-shadow:08px24px rgba(30,136,229,0.08); margin-top:20px;">
+            <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
+                <div style="min-width:240px;">
+                    <h3 style="margin:008px0; color:#0D47A1;">AgroMinds</h3>
+                    <p style="margin:4px0;"><strong>Dirección:</strong> Ruta Provincial9, Km1234, Córdoba, Argentina</p>
+                    <p style="margin:4px0;"><strong>Teléfono:</strong> <a href="tel:+5491112345678" style="color:#0D47A1; text-decoration:none;">+5491112345678</a></p>
+                    <p style="margin:4px0;"><strong>Email:</strong> <a href="mailto:contacto@agrominds.com.ar" style="color:#0D47A1; text-decoration:none;">contacto@agrominds.com.ar</a></p>
+                    <p style="margin:4px0;"><strong>Horario:</strong> Lun - Vie9:00 -18:00</p>
+                </div>
+
+                <div style="flex:1; min-width:220px;">
+                    <h4 style="margin:008px0; color:#0D47A1;">Soporte & Ventas</h4>
+                    <p style="margin:4px0;"><strong>Soporte:</strong> <a href="mailto:soporte@agrominds.com.ar" style="color:#0D47A1; text-decoration:none;">soporte@agrominds.com.ar</a></p>
+                    <p style="margin:4px0;"><strong>Ventas:</strong> <a href="mailto:ventas@agrominds.com.ar" style="color:#0D47A1; text-decoration:none;">ventas@agrominds.com.ar</a></p>
+                    <p style="margin:8px000;">Síguenos:</p>
+                    <p style="margin:6px000;">
+                        <a href="#" style="display:inline-block; margin-right:8px; color:#1E88E5; text-decoration:none;">Twitter</a>
+                        <a href="#" style="display:inline-block; margin-right:8px; color:#1E88E5; text-decoration:none;">LinkedIn</a>
+                        <a href="#" style="display:inline-block; color:#1E88E5; text-decoration:none;">Instagram</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+        <!-- end contact-info -->
+
+        <section style="margin-top:20px;">
+            <form method="post" action="@Url.Action("SendContact", "Home")">
+                <label for="name">Nombre</label><br />
+                <input type="text" id="name" name="name" style="width:100%;padding:8px;margin:6px0;" required />
+                <label for="email">Email</label><br />
+                <input type="email" id="email" name="email" style="width:100%;padding:8px;margin:6px0;" required />
+                <label for="message">Mensaje</label><br />
+                <textarea id="message" name="message" rows="6" style="width:100%;padding:8px;margin:6px0;" required></textarea>
+                <button type="submit" style="background:#2E7D32;color:white;padding:10px16px;border:none;border-radius:4px;">Enviar</button>
+            </form>
+        </section>
+    </main>
+    <script src="~/Scripts/scriptIdioma.js"></script>
 
     <footer style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #2E7D32; color: white; padding: 10px; text-align: center;">
         © 2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.
@@ -205,7 +234,7 @@
     <script src="~/Scripts/scriptIdioma.js"></script>
 
     <script>
-        (function() {
+        (function () {
             var key = 'cookieConsentAgrominds';
             function hasConsent() {
                 try { return localStorage.getItem(key) === 'accepted'; } catch (e) { return false; }
@@ -222,7 +251,7 @@
                 if (m) m.style.display = 'none';
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 if (!hasConsent()) {
                     showModal();
                 }
@@ -230,8 +259,8 @@
                 var acceptBtn = document.getElementById('acceptCookies');
                 var declineBtn = document.getElementById('declineCookies');
 
-                if (acceptBtn) acceptBtn.addEventListener('click', function() { setConsent('accepted'); hideModal(); });
-                if (declineBtn) declineBtn.addEventListener('click', function() { setConsent('declined'); hideModal(); });
+                if (acceptBtn) acceptBtn.addEventListener('click', function () { setConsent('accepted'); hideModal(); });
+                if (declineBtn) declineBtn.addEventListener('click', function () { setConsent('declined'); hideModal(); });
             });
         })();
     </script>

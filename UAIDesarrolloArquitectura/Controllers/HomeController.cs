@@ -22,6 +22,28 @@ namespace UAIDesarrolloArquitectura.Controllers
         {
             return View("Index");
         }
+
+        // Nueva acción para la página "Nosotros" / AboutUs
+        [HttpGet]
+        public ActionResult Nosotros()
+        {
+            return View("AboutUs");
+        }
+
+        // Nueva acción para la página "Contacto" / Contact
+        [HttpGet]
+        public ActionResult Contact()
+        {
+            return View("Contact");
+        }
+
+        // Nueva acción para la página "Privacy"
+        [HttpGet]
+        public ActionResult Privacy()
+        {
+            return View("Privacy");
+        }
+
         public ActionResult Plans()
         {
             // Crear una instancia del cliente del servicio web

@@ -47,46 +47,46 @@
             font-family: 'Chivo', Arial, sans-serif;
         }
 
-        #cookieConsentModal a {
-            color: #BBDEFB;
-            text-decoration: underline;
-        }
+            #cookieConsentModal a {
+                color: #BBDEFB;
+                text-decoration: underline;
+            }
 
-        #cookieConsentModal .consent-content {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
+            #cookieConsentModal .consent-content {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
 
-        #cookieConsentModal p {
-            margin: 0;
-            color: #ffffff;
-        }
+            #cookieConsentModal p {
+                margin: 0;
+                color: #ffffff;
+            }
 
-        #cookieConsentModal .actions {
-            margin-left: auto;
-            display: flex;
-            gap: 8px;
-        }
+            #cookieConsentModal .actions {
+                margin-left: auto;
+                display: flex;
+                gap: 8px;
+            }
 
-        #cookieConsentModal .btn {
-            padding: 8px 12px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-        }
+            #cookieConsentModal .btn {
+                padding: 8px 12px;
+                border-radius: 4px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+            }
 
-        #cookieConsentModal .btn-accept {
-            background: #0D47A1; /* darker blue */
-            color: white;
-        }
+            #cookieConsentModal .btn-accept {
+                background: #0D47A1; /* darker blue */
+                color: white;
+            }
 
-        #cookieConsentModal .btn-decline {
-            background: rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
+            #cookieConsentModal .btn-decline {
+                background: rgba(255, 255, 255, 0.12);
+                color: #ffffff;
+                border: 1px solid rgba(255, 255, 255, 0.18);
+            }
 
         @@media (max-width: 600px) {
             #cookieConsentModal {
@@ -96,15 +96,15 @@
                 padding: 12px;
             }
 
-            #cookieConsentModal .consent-content {
-                flex-direction: column;
-                align-items: stretch;
-            }
+                #cookieConsentModal .consent-content {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
 
-            #cookieConsentModal .actions {
-                margin-left: 0;
-                justify-content: flex-end;
-            }
+                #cookieConsentModal .actions {
+                    margin-left: 0;
+                    justify-content: flex-end;
+                }
         }
     </style>
 </head>
@@ -170,15 +170,16 @@
 
     <div class="container" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 40px; margin-top: 40px;">
         <div id="descripcion" style="max-width: 500px; text-align: left; line-height: 1.6;">
-            <h2>@translator.GetTraduction(service, "Promo1")</h2>
-            <p>@translator.GetTraduction(service, "Promo2text")</p>
-            <p>@translator.GetTraduction(service, "Promo3text")</p>
-            <p>@translator.GetTraduction(service, "Promo4text")</p>
-            <p>@translator.GetTraduction(service, "Promo5text")</p>
-            <p>@translator.GetTraduction(service, "Promo6text")</p>
+            <h2>Quiénes somos</h2>
+            <p>
+                En AgroMinds, impulsamos una nueva era en la agricultura mediante la tecnología, la robótica y la inteligencia de datos.
+                Somos una empresa argentina dedicada al desarrollo de robots agrícolas inteligentes, diseñados para optimizar tareas clave del campo como siembra, riego, monitoreo de cultivos, detección de plagas y cosecha.
+
+                Nuestro objetivo es democratizar el acceso a la tecnología agrícola, brindando herramientas de automatización avanzada a pequeñas y medianas empresas del sector, cooperativas y productores que buscan mejorar su productividad de forma eficiente, rentable y sostenible.
+            </p>
         </div>
         <div style="flex-shrink: 0;">
-            <img src="~/assets/robots.png" alt="AgroMinds Logo"
+            <img src="~/assets/team.jpg" alt="AgroMinds Logo"
                  style="max-width: 300px; height: auto; border-radius: 10px;">
         </div>
     </div>
@@ -205,7 +206,7 @@
     <script src="~/Scripts/scriptIdioma.js"></script>
 
     <script>
-        (function() {
+        (function () {
             var key = 'cookieConsentAgrominds';
             function hasConsent() {
                 try { return localStorage.getItem(key) === 'accepted'; } catch (e) { return false; }
@@ -222,7 +223,7 @@
                 if (m) m.style.display = 'none';
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 if (!hasConsent()) {
                     showModal();
                 }
@@ -230,8 +231,8 @@
                 var acceptBtn = document.getElementById('acceptCookies');
                 var declineBtn = document.getElementById('declineCookies');
 
-                if (acceptBtn) acceptBtn.addEventListener('click', function() { setConsent('accepted'); hideModal(); });
-                if (declineBtn) declineBtn.addEventListener('click', function() { setConsent('declined'); hideModal(); });
+                if (acceptBtn) acceptBtn.addEventListener('click', function () { setConsent('accepted'); hideModal(); });
+                if (declineBtn) declineBtn.addEventListener('click', function () { setConsent('declined'); hideModal(); });
             });
         })();
     </script>

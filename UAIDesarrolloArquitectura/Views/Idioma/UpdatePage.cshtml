@@ -106,14 +106,14 @@
         }
     </nav>
     <header>
-        <h1>Bersonal</h1>
+        <h1>Agrominds</h1>
     </header>
-    <nav>
-        <a @Url.Action("Index", "Home")>Internet</a>
-        <a href="https://es.euronews.com/noticias/internacional">@translator.GetTraduction(service, "Store")</a>
-        <a href="https://es.euronews.com/business">@translator.GetTraduction(service, "Portability")</a>
+    <nav class="menu-secundario">
+        <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
         <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
-        <a href="https://es.euronews.com/green">TV</a>
+        <a href="@Url.Action("Servicios", "Home")">@translator.GetTraduction(service, "Services")</a>
+        <a href="@Url.Action("Nosotros", "Home")">@translator.GetTraduction(service, "AboutUs")</a>
+        <a href="@Url.Action("Contact", "Home")">@translator.GetTraduction(service, "Contact")</a>
     </nav>
     <div class="contenedor-tabla">
         <table>

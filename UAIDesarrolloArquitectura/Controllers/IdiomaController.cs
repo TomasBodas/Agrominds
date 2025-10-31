@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Web.Mvc;
 using UAIDesarrolloArquitectura.Models;
 using BLL;
+using System;
 
 namespace UAIDesarrolloArquitectura.Controllers
 {
@@ -36,7 +37,22 @@ namespace UAIDesarrolloArquitectura.Controllers
         {
             string valorSeleccionado = data.Valor;
             string urlActual = data.Url;
-            urlActual = urlActual.Replace("?", "");
+
+            // Asegurar redireccion valida: usar ruta relativa del referrer si es absoluta
+            if (!string.IsNullOrEmpty(urlActual))
+            {
+                Uri uri;
+                if (Uri.TryCreate(urlActual, UriKind.Absolute, out uri))
+                {
+                    // Conservar path, query y fragmento
+                    urlActual = uri.PathAndQuery + uri.Fragment;
+                }
+            }
+            else
+            {
+                urlActual = "/"; // fallback
+            }
+
             BLL_CheckDigitsManager checkDigitsManager = new BLL_CheckDigitsManager();
 
             if (SessionManager.IsLogged())

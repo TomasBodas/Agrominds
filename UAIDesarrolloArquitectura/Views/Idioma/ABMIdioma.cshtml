@@ -30,47 +30,84 @@
         .contenedor-tabla {
             max-height: 400px;
             overflow-y: auto;
-            border: 1px solid #ddd;
+            border: 1px solid #a5d6a7; /* Verde suave */
+            background-color: #f9fdf9;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(46, 125, 50, 0.1);
+            padding: 10px;
         }
 
         table {
             width: 80%;
             margin: auto;
             border-collapse: collapse;
+            font-family: "Chivo", Arial, sans-serif;
         }
 
         th, td {
-            padding: 8px;
+            padding: 10px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #c8e6c9; /* Verde claro */
+            color: #1b5e20; /* Verde oscuro */
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #e8f5e9; /* Fondo verde muy claro */
+            color: #2e7d32; /* Verde institucional */
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background-color: #f1f8e9; /* Hover verde tenue */
+            transition: background-color 0.3s ease;
         }
 
         .btnRemover {
-            padding: 10px;
-            background-color: rgb(30, 100, 196);
+            padding: 8px 14px;
+            background-color: #2e7d32; /* Verde principal */
             color: white;
             align-items: center;
-            border-style: none;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
             margin: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
         }
 
             .btnRemover:hover {
-                background-color: rgb(34, 124, 222);
-                cursor: pointer;
+                background-color: #1b5e20; /* Verde más oscuro */
+                transform: translateY(-1px);
             }
 
         .textBoxContainer {
-            display: flex;
             margin: 10px;
             justify-content: center;
-            gap: 5px;
-            font-size: 13px;
+            gap: 8px;
+            font-size: 14px;
+            flex-wrap: wrap;
         }
+
+            .textBoxContainer input {
+                padding: 6px 8px;
+                border: 1px solid #c8e6c9;
+                border-radius: 6px;
+                font-size: 14px;
+                transition: all 0.2s ease;
+                width: 220px; /* normal width */
+                max-width: 90%;
+                box-sizing: border-box;
+            }
+
+                .textBoxContainer input:focus {
+                    border-color: #66bb6a;
+                    box-shadow: 0 0 5px rgba(102, 187, 106, 0.5);
+                    outline: none;
+                }
     </style>
+
 </head>
 <body>
     <nav class="barra">
@@ -78,7 +115,6 @@
         {
             <div class="opciones">
                 <a href="@Url.Action("Logout", "Home")">@translator.GetTraduction(service, "Logout")</a>
-                <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
                 <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora", "Bitacora")">@translator.GetTraduction(service, "Log")</a>
                 <a style="display:none;" id="abmusuarios" href="#">@translator.GetTraduction(service, "ManageUser")</a>
                 <a style="display:none;" id="restore" href="@Url.Action("BackupRestore", "Backup")">@translator.GetTraduction(service, "Restoredb")</a>
@@ -91,7 +127,6 @@
                          </text>
                      }
                 </script>
-                <a href="@Url.Action("Carrito", "Carrito")">@translator.GetTraduction(service, "Cart")</a>
             </div>
             <div class="opciones">
                 <img src="~/assets/user-image-with-black-background-svgrepo-com.svg" width="30px" />
@@ -100,27 +135,38 @@
         }
         else
         {
-    <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Login")</a>
+            <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Login")</a>
         }
     </nav>
     <header>
-        <h1>Bersonal</h1>
+        <h1>AgroMinds</h1>
     </header>
-    <nav>
-        <a @Url.Action("Index", "Home")>Internet</a>
-        <a href="https://es.euronews.com/noticias/internacional">@translator.GetTraduction(service, "Store")</a>
-        <a href="https://es.euronews.com/business">@translator.GetTraduction(service, "Portability")</a>
+    <nav class="menu-secundario">
+        <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
         <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
-        <a href="https://es.euronews.com/green">TV</a>
+        <a href="@Url.Action("Servicios", "Home")">@translator.GetTraduction(service, "Services")</a>
+        <a href="@Url.Action("Nosotros", "Home")">@translator.GetTraduction(service, "AboutUs")</a>
+        <a href="@Url.Action("Contact", "Home")">@translator.GetTraduction(service, "Contact")</a>
     </nav>
     <form action="@Url.Action("AddLanguage", "Idioma")" method="post">
         <div class="textBoxContainer">
-            @translator.GetTraduction(service, "Name"): <input type="text" name="name" required />
+            @translator.GetTraduction(service, "Name"):
+            <input type="text" name="name" required />
+            <button class="btnRemover" type="submit">@translator.GetTraduction(service, "CreateLanguage")</button>
         </div>
-        <button class="btnRemover" type="submit">@translator.GetTraduction(service, "CreateLanguage")</button>
     </form>
     <br />
     <div class="contenedor-tabla">
+        <div style="display:flex; justify-content:center; gap:10px; align-items:center; margin-bottom:10px;">
+            <label for="filterIdiomaSelect" style="color:#1b5e20; font-weight:600;">Filter:</label>
+            <select id="filterIdiomaSelect" style="padding:6px; border-radius:6px; border:1px solid #c8e6c9;">
+                <option value="all">Todos</option>
+                @foreach (var langOpt in Model)
+                {
+                <option value="@langOpt.Name">@langOpt.Name</option>
+                }
+            </select>
+        </div>
         <table>
             <thead>
                 <tr>
@@ -137,7 +183,7 @@
                 {
                     foreach (var tran in lang.ListTranslate)
                     {
-                        <tr>
+                        <tr data-lang="@lang.Name">
                             <form action="@Url.Action("UpdatePage", "Idioma")" method="post">
                             <td><input type="hidden" name="id" value="@tran.Id" />@tran.Id</td>
                             <td><input type="text" name="name" value="@lang.Name" /></td>
@@ -151,6 +197,26 @@
             </tbody>
         </table>
     </div>
+    <script>
+    (function(){
+        var select = document.getElementById('filterIdiomaSelect');
+        if(!select) return;
+        select.addEventListener('change', function(){
+            var val = this.value;
+            var rows = document.querySelectorAll('.contenedor-tabla table tbody tr');
+            rows.forEach(function(r){
+                if(val === 'all' || r.getAttribute('data-lang') === val){
+                    r.style.display = '';
+                } else {
+                    r.style.display = 'none';
+                }
+            });
+        });
+    })();
+    </script>
 </body>
+<footer style="position: fixed; bottom:0; left:0; width:100%; background-color: #2E7D32; color: white; padding:10px; text-align: center;">
+ ©2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.
+</footer>
 </html>
 

@@ -18,50 +18,90 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f0f0;
+            background: linear-gradient(180deg, #e8f5e9, #c8e6c9);
         }
 
-        .login-container {
-            width: 300px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        .register-container {
+            width: 360px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #a5d6a7;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
         }
 
-            .login-container h2 {
+            .register-container h2 {
                 text-align: center;
                 margin-bottom: 20px;
+                color: #2e7d32;
+                font-weight: 800;
+                font-size: 32px;
+                letter-spacing: 1px;
+                text-shadow: 1px 1px 4px rgba(46, 125, 50, 0.2);
             }
 
-            .login-container input {
+            .register-container label {
+                display: block;
+                margin-top: 10px;
+                font-weight: 600;
+                color: #1b5e20;
+            }
+
+            .register-container input {
                 width: 100%;
                 padding: 10px;
-                margin-bottom: 10px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
+                margin-top: 5px;
+                margin-bottom: 12px;
+                border: 2px solid #c8e6c9;
+                border-radius: 8px;
                 box-sizing: border-box;
+                transition: all 0.3s ease;
             }
 
-            .login-container button {
+                .register-container input:focus {
+                    border-color: #66bb6a;
+                    box-shadow: 0 0 5px rgba(102, 187, 106, 0.5);
+                    outline: none;
+                }
+
+            .register-container button {
                 width: 100%;
                 padding: 10px;
-                background-color: #007bff;
+                background-color: #2e7d32;
                 color: #fff;
                 border: none;
-                border-radius: 5px;
+                border-radius: 8px;
                 cursor: pointer;
-                transition: background-color 0.3s ease;
+                transition: background-color 0.3s ease, transform 0.1s ease;
+                font-weight: bold;
+                letter-spacing: 0.5px;
+                margin-top: 10px;
             }
 
-                .login-container button:hover {
-                    background-color: #0056b3;
+                .register-container button:hover {
+                    background-color: #1b5e20;
+                    transform: translateY(-1px);
+                }
+
+            .register-container a {
+                text-decoration: none;
+                color: #388e3c;
+                text-align: center;
+                display: block;
+                margin-top: 12px;
+                font-weight: 600;
+                transition: color 0.3s ease;
+            }
+
+                .register-container a:hover {
+                    color: #1b5e20;
                 }
     </style>
+
 </head>
 <body>
-    <div class="login-container">
-        <h2>Register</h2>
+    <div class="register-container">
+        <h2>AgroMinds</h2>
         @using (Html.BeginForm("Register", "Register", FormMethod.Post))
         {
             <div>
@@ -71,7 +111,7 @@
                 <input type="text" name="surname" placeholder="Apellido" required />
             </div>
             <div>
-                <input type="number" name="DNI" placeholder="DNI" required max="99999999"/>
+                <input type="number" name="DNI" placeholder="DNI" required max="99999999" />
             </div>
             <div>
                 <input type="email" name="Email" placeholder="Email" required />
@@ -88,6 +128,9 @@
             </div>
         }
     </div>
+    <footer style="position: fixed; bottom:0; left:0; width:100%; background-color: #2E7D32; color: white; padding:10px; text-align: center;">
+        ©2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.
+    </footer>
 </body>
 </html>
 

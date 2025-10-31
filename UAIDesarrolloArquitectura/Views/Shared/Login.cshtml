@@ -1,5 +1,4 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 @model UAIDesarrolloArquitectura.Models.ViewModel.LoginViewModel
 @{ 
@@ -31,74 +30,102 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f0f0;
+            background: linear-gradient(180deg, #e8f5e9, #c8e6c9); /* Verde suave */
         }
 
         .login-container {
-            width: 300px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 320px;
+            padding: 25px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #a5d6a7;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
             display: flex;
-            flex-direction: COLUMN;
+            flex-direction: column;
         }
 
             .login-container h2 {
                 text-align: center;
                 margin-bottom: 20px;
+                color: #2e7d32;
+                font-weight: 800;
+                font-size: 26px; /* 🔼 Aumentado de 26px a 36px */
+                letter-spacing: 1px;
+                text-shadow: 1px 1px 4px rgba(46, 125, 50, 0.2);
             }
 
             .login-container input {
                 width: 100%;
                 padding: 10px;
-                margin-bottom: 10px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
+                margin-bottom: 12px;
+                border: 2px solid #c8e6c9;
+                border-radius: 8px;
                 box-sizing: border-box;
+                transition: all 0.3s ease;
             }
+
+                .login-container input:focus {
+                    border-color: #66bb6a;
+                    box-shadow: 0 0 5px rgba(102, 187, 106, 0.5);
+                    outline: none;
+                }
 
             .login-container button {
                 width: 100%;
                 padding: 10px;
-                background-color: #007bff;
+                background-color: #2e7d32; /* Verde intenso */
                 color: #fff;
                 border: none;
-                border-radius: 5px;
+                border-radius: 8px;
                 cursor: pointer;
-                transition: background-color 0.3s ease;
+                transition: background-color 0.3s ease, transform 0.1s ease;
+                font-weight: bold;
+                letter-spacing: 0.5px;
             }
 
                 .login-container button:hover {
-                    background-color: #0056b3;
+                    background-color: #1b5e20;
+                    transform: translateY(-1px);
                 }
+
             .login-container a {
                 text-decoration: none;
-                color: #0056b3;
+                color: #388e3c;
                 text-align: center;
+                display: block;
+                margin-top: 12px;
+                font-weight: 600;
+                transition: color 0.3s ease;
             }
+
+                .login-container a:hover {
+                    color: #1b5e20;
+                }
+
         .validation-error {
             display: none;
-            color: red;
+            color: #1b5e20;
             font-weight: bold;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
             padding: 10px;
             border-radius: 5px;
             margin-top: 10px;
             margin-bottom: 10px;
-            font-size:15px;
+            font-size: 15px;
         }
+
         .field-validation-error {
             display: block;
-        }
+        }s
     </style>
+
 </head>
 <body>
     @using (Html.BeginForm("Login", "Login", FormMethod.Post))
     {
 <div class="login-container">
-    <a href="@Url.Action("Index", "Home")"><p>Agrominds</p></a>
+    <a href="@Url.Action("Index", "Home")"><h2>AgroMinds</h2></a>
     <form id="login-form">
         <div>
             @Html.LabelFor(m => m.Email)
@@ -116,6 +143,9 @@
         @Html.ActionLink("Registrarse", "Register", "Register")
     </form>
 </div>}
+ <footer style="position: fixed; bottom:0; left:0; width:100%; background-color: #2E7D32; color: white; padding:10px; text-align: center;">
+ ©2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.
+ </footer>
 </body>
 </html>
 

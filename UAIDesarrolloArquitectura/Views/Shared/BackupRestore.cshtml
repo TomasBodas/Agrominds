@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "BackupRestore";
     Services.Idioma.Translator translator = new Services.Idioma.Translator();
     UAIDesarrolloArquitectura.Controllers.IdiomaController lC = new UAIDesarrolloArquitectura.Controllers.IdiomaController();
@@ -17,7 +16,6 @@
 }
 
 <!DOCTYPE html>
-
 <html>
 <head>
     <meta charset="UTF-8">
@@ -27,42 +25,67 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <title>@translator.GetTraduction(service, "Restoredb")</title>
-    <style>
-        .contenedor-backup-restore {
-            margin: 150px auto;
-            width: 80%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 15px;
-            align-items: center;
-        }
-        .boton {
-            padding: 10px;
-            background-color: rgb(30, 100, 196);
-            color: white;
-            border-style: none;
-            width: 180px;
-            font-size: 14px;
-            font-family: "Chivo", Arial, sans-serif;
-            text-decoration:none;
-        }
-            .boton:hover {
-                background-color: rgb(34, 124, 222);
-                cursor: pointer;
-            }
-        .contenedor-botones-restore {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        input[type="text"] {
-            width: 300px;
-            border-style: none;
-            border-radius: 5px;
-            padding: 5px;
-        }
-    </style>
+<style>
+    .contenedor-backup-restore {
+        margin: 150px auto;
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 15px;
+        align-items: center;
+        background-color: #f9fdf9;
+        border: 1px solid #c8e6c9;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 4px 10px rgba(46, 125, 50, 0.1);
+    }
+
+    .boton {
+        padding: 10px 18px;
+        background-color: #2e7d32; /* Verde principal */
+        color: white;
+        border: none;
+        border-radius: 6px;
+        width: 200px;
+        font-size: 15px;
+        font-family: "Chivo", Arial, sans-serif;
+        text-decoration: none;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+    }
+
+    .boton:hover {
+        background-color: #1b5e20; /* Verde más oscuro */
+        cursor: pointer;
+        transform: translateY(-1px);
+    }
+
+    .contenedor-botones-restore {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    input[type="text"] {
+        width: 320px;
+        border: 2px solid #c8e6c9;
+        border-radius: 6px;
+        padding: 8px;
+        font-family: "Chivo", Arial, sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+        border-color: #66bb6a;
+        box-shadow: 0 0 5px rgba(102, 187, 106, 0.5);
+        outline: none;
+    }
+</style>
+
 </head>
 <body>
     <nav class="barra">
@@ -70,7 +93,6 @@
         {
             <div class="opciones">
                 <a href="@Url.Action("Logout", "Home")">@translator.GetTraduction(service, "Logout")</a>
-                <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
                 <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora", "Bitacora")">@translator.GetTraduction(service, "Log")</a>
                 <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios", "ABM")">@translator.GetTraduction(service, "ManageUser")</a>
                 <a style="display:none;" id="restore" href="@Url.Action("BackupRestore", "Backup")">@translator.GetTraduction(service, "Restoredb")</a>
@@ -85,7 +107,6 @@
                          </text>
                      }
                 </script>
-                <a href="@Url.Action("Carrito", "Carrito")">@translator.GetTraduction(service, "Cart")</a>
             </div>
             <div class="opciones">
                 <img src="~/assets/user-image-with-black-background-svgrepo-com.svg" width="30px" />
@@ -115,14 +136,14 @@
         </form>
     </nav>
     <header>
-        <h1>Bersonal</h1>
+        <h1 style="color:#2E7D32;">AgroMinds</h1>
     </header>
-    <nav>
-        <a href="/pages/contacto.html">Internet</a>
-        <a href="https://es.euronews.com/noticias/internacional">@translator.GetTraduction(service, "Store")</a>
-        <a href="https://es.euronews.com/business">@translator.GetTraduction(service, "Portability")</a>
+    <nav class="menu-secundario">
+        <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
         <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
-        <a href="https://es.euronews.com/green">TV</a>
+        <a href="@Url.Action("Servicios", "Home")">@translator.GetTraduction(service, "Services")</a>
+        <a href="@Url.Action("Nosotros", "Home")">@translator.GetTraduction(service, "AboutUs")</a>
+        <a href="@Url.Action("Contact", "Home")">@translator.GetTraduction(service, "Contact")</a>
     </nav>
     <div class="contenedor-backup-restore">
         <a class="boton" href="@Url.Action("Backup", "Backup")">@translator.GetTraduction(service, "CreateBackup")</a>
@@ -150,5 +171,7 @@
     }
     <script src="~/Scripts/scriptIdioma.js"></script>
 </body>
-
-</html>
+    <footer style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #2E7D32; color: white; padding: 10px; text-align: center;">
+        © 2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.
+    </footer>
+</html></html>
