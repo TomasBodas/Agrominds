@@ -182,9 +182,13 @@ namespace DAL
                 deleteUserQueryCommand.ExecuteNonQuery();
             }
         }
-        public void UpdateUser(User user)
+        public void UpdateUser(User user, bool idioma)
         {
-            string emailHash = PasswordEncrypter.EncryptData(user.Email);
+            string emailHash = user.Email;
+            if (idioma != true)
+            {
+                emailHash = PasswordEncrypter.EncryptData(user.Email);
+            }
             using (SqlConnection connection = new SqlConnection(CONNECTION_STRING))
             {
                 string updateUserQuery = $"UPDATE usuario SET nombre='{user.Name}', apellido='{user.Surname}', DNI={user.DNI}, email='{emailHash}', idiomaid = '{user.LanguageId}' WHERE id={user.id}";

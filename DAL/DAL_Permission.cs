@@ -203,10 +203,26 @@ namespace DAL
                 try
                 {
                     connection.Open();
-                    string insertQuery = $"INSERT INTO perfil (Nombre) VALUES ('{profileName}')";
-                    using (SqlCommand insertCommand = new SqlCommand(insertQuery, connection))
+                    using (var tx = connection.BeginTransaction())
                     {
-                        insertCommand.ExecuteNonQuery();
+                        // Insertar perfil
+                        string insertPerfil = "INSERT INTO perfil (Nombre) VALUES (@name)";
+                        using (SqlCommand insertPerfilCmd = new SqlCommand(insertPerfil, connection, tx))
+                        {
+                            insertPerfilCmd.Parameters.AddWithValue("@name", profileName);
+                            insertPerfilCmd.ExecuteNonQuery();
+                        }
+
+                        // Insertar como rol en Permiso si no existe (PermisoAtomico NULL)
+                        string insertPermiso = @"IF NOT EXISTS(SELECT 1 FROM Permiso WHERE Nombre = @name)
+ INSERT INTO Permiso (Nombre, PermisoAtomico) VALUES (@name, NULL)";
+                        using (SqlCommand insertPermisoCmd = new SqlCommand(insertPermiso, connection, tx))
+                        {
+                            insertPermisoCmd.Parameters.AddWithValue("@name", profileName);
+                            insertPermisoCmd.ExecuteNonQuery();
+                        }
+
+                        tx.Commit();
                     }
                 }
                 catch (Exception ex)
@@ -222,10 +238,10 @@ namespace DAL
                 try
                 {
                     connection.Open();
-                    int authID = 0;
-                    int profileID = 0;
+                    int authID =0;
+                    int profileID =0;
                     //Obtenemos el id del permiso
-                    string selectQuery1 = $"SELECT * FROM Permiso WHERE Nombre = '{authName}'";
+                    string selectQuery1 = $"SELECT * FROM permiso WHERE Nombre = '{authName}'";
                     SqlCommand selectCommand1 = new SqlCommand(selectQuery1, connection);
                     using (SqlDataReader reader = selectCommand1.ExecuteReader())
                     {

@@ -65,7 +65,7 @@ namespace UAIDesarrolloArquitectura.Controllers
         [HttpPost]
         public ActionResult UpdateUser(User pUser)
         {
-            dal_user.UpdateUser(pUser);
+            dal_user.UpdateUser(pUser, false);
             BLL_CheckDigitsManager checkDigitsManager = new BLL_CheckDigitsManager();
             checkDigitsManager.SetCheckDigits();
             List<User> usersList = dal_user.getUsers();

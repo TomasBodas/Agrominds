@@ -59,7 +59,7 @@ namespace UAIDesarrolloArquitectura.Controllers
             {
                 SessionManager.GetInstance.User.LanguageId = int.Parse(valorSeleccionado);
                 DAL_User dal_user = new DAL_User();
-                dal_user.UpdateUser(SessionManager.GetInstance.User);
+                dal_user.UpdateUser(SessionManager.GetInstance.User, true);
                 checkDigitsManager.SetCheckDigits();
             }
 
@@ -106,6 +106,23 @@ namespace UAIDesarrolloArquitectura.Controllers
             langList = dal_language.GetLanguages();
 
             return View("ABMIdioma", langList);
+        }
+
+        [HttpPost]
+        public ActionResult AddWord(string tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                ModelState.AddModelError("tag", "Tag requerido");
+            }
+            else
+            {
+                List<Language> langList = dal_language.GetLanguages();
+                List<int> ids = new List<int>();
+                foreach (Language l in langList) ids.Add(l.Id);
+                dal_language.AddTagForItself(ids, tag.Trim());
+            }
+            return View("ABMIdioma", dal_language.GetLanguages());
         }
 
         [HttpPost]

@@ -106,6 +106,25 @@
                     box-shadow: 0 0 5px rgba(102, 187, 106, 0.5);
                     outline: none;
                 }
+
+        .add-word-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px;
+            flex-wrap: wrap;
+        }
+
+        .add-word-container input {
+            padding: 6px 8px;
+            border: 1px solid #c8e6c9;
+            border-radius: 6px;
+        }
+
+        .add-word-container input:focus {
+            border-color: #66bb6a;
+            outline: none;
+        }
     </style>
 
 </head>
@@ -113,12 +132,14 @@
     <nav class="barra">
         @if (Services.SessionManager.IsLogged())
         {
-            <div class="opciones">
-                <a href="@Url.Action("Logout", "Home")">@translator.GetTraduction(service, "Logout")</a>
-                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora", "Bitacora")">@translator.GetTraduction(service, "Log")</a>
-                <a style="display:none;" id="abmusuarios" href="#">@translator.GetTraduction(service, "ManageUser")</a>
-                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore", "Backup")">@translator.GetTraduction(service, "Restoredb")</a>
-                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma", "Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
+            <div id="opciones" class="opciones">
+                <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service,"Logout")</a>
+                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service,"Log")</a>
+                <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service,"ManageUser")</a>
+                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service,"Restoredb")</a>
+                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service,"ManageLanguage")</a>
+                <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service,"CreateProfile")</a>
+                <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service,"AssignProfile")</a>
                 <script type="text/javascript">
                      @foreach (string permission in Services.SessionManager.GetInstance.User.permissionList)
                      {
@@ -129,37 +150,61 @@
                 </script>
             </div>
             <div class="opciones">
-                <img src="~/assets/user-image-with-black-background-svgrepo-com.svg" width="30px" />
-                <p style='color: black; white-space: nowrap;'>@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p>
+                <p style="color:white;">@translator.GetTraduction(service,"Welcome"), @Services.SessionManager.GetInstance.User.Name</p>
             </div>
         }
         else
         {
-            <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Login")</a>
+            <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service,"Login")</a>
+            <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service,"Register")</a>
         }
+        <form>
+            <select id="option" onchange="enviarValor()">
+                @foreach(Services.Idioma.Language l in service.GetLanguages())
+                {
+                    if(service.SelectedLanguage.Id==l.Id)
+                    {
+                        <option value="@l.Id" selected>@translator.GetTraduction(service,l.Name)</option>
+                    }
+                    else
+                    {
+                        <option value="@l.Id">@translator.GetTraduction(service,l.Name)</option>
+                    }
+                }
+                }
+            </select>
+        </form>
     </nav>
     <header>
-        <h1>AgroMinds</h1>
+        <h1 style="color:#2E7D32;">AgroMinds</h1>
     </header>
     <nav class="menu-secundario">
-        <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
-        <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
-        <a href="@Url.Action("Servicios", "Home")">@translator.GetTraduction(service, "Services")</a>
-        <a href="@Url.Action("Nosotros", "Home")">@translator.GetTraduction(service, "AboutUs")</a>
-        <a href="@Url.Action("Contact", "Home")">@translator.GetTraduction(service, "Contact")</a>
+        <a href="@Url.Action("Index","Home")">@translator.GetTraduction(service,"Main")</a>
+        <a href="@Url.Action("Plans","Home")">@translator.GetTraduction(service,"Plans")</a>
+        <a href="@Url.Action("Servicios","Home")">@translator.GetTraduction(service,"Services")</a>
+        <a href="@Url.Action("Nosotros","Home")">@translator.GetTraduction(service,"AboutUs")</a>
+        <a href="@Url.Action("Contact","Home")">@translator.GetTraduction(service,"Contact")</a>
     </nav>
-    <form action="@Url.Action("AddLanguage", "Idioma")" method="post">
+    <form action="@Url.Action("AddLanguage","Idioma")" method="post">
         <div class="textBoxContainer">
-            @translator.GetTraduction(service, "Name"):
+            @translator.GetTraduction(service,"Name"):
             <input type="text" name="name" required />
-            <button class="btnRemover" type="submit">@translator.GetTraduction(service, "CreateLanguage")</button>
+            <button class="btnRemover" type="submit">@translator.GetTraduction(service,"CreateLanguage")</button>
+        </div>
+    </form>
+    <!-- New form to add word/tag -->
+    <form action="@Url.Action("AddWord","Idioma")" method="post">
+        <div class="add-word-container">
+            <p>Tag</p>:
+            <input type="text" name="tag" required />
+            <button class="btnRemover" type="submit">Agregar</button>
         </div>
     </form>
     <br />
     <div class="contenedor-tabla">
-        <div style="display:flex; justify-content:center; gap:10px; align-items:center; margin-bottom:10px;">
-            <label for="filterIdiomaSelect" style="color:#1b5e20; font-weight:600;">Filter:</label>
-            <select id="filterIdiomaSelect" style="padding:6px; border-radius:6px; border:1px solid #c8e6c9;">
+        <div style="display:flex;justify-content:center;gap:10px;align-items:center;margin-bottom:10px;">
+            <label for="filterIdiomaSelect" style="color:#1b5e20;font-weight:600;">Filter:</label>
+            <select id="filterIdiomaSelect" style="padding:6px;border-radius:6px;border:1px solid #c8e6c9;">
                 <option value="all">Todos</option>
                 @foreach (var langOpt in Model)
                 {
@@ -171,10 +216,9 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>@translator.GetTraduction(service, "Language")</th>
+                    <th>@translator.GetTraduction(service,"Language")</th>
                     <th>Tag</th>
-                    <th>@translator.GetTraduction(service, "Text")</th>
-                    <th></th>
+                    <th>@translator.GetTraduction(service,"Text")</th>
                     <th></th>
                 </tr>
             </thead>
@@ -184,12 +228,12 @@
                     foreach (var tran in lang.ListTranslate)
                     {
                         <tr data-lang="@lang.Name">
-                            <form action="@Url.Action("UpdatePage", "Idioma")" method="post">
+                            <form action="@Url.Action("UpdateTranslate","Idioma")" method="post">
                             <td><input type="hidden" name="id" value="@tran.Id" />@tran.Id</td>
                             <td><input type="text" name="name" value="@lang.Name" /></td>
                             <td><input type="text" name="tag" value="@tran.Name" /></td>
                             <td><input type="text" name="text" value="@tran.Text" /></td>
-                            <td><button class="btnRemover" type="submit">@translator.GetTraduction(service, "Modify")</button></td>
+                            <td><button class="btnRemover" type="submit">@translator.GetTraduction(service,"Modify")</button></td>
                             </form>
                         </tr>
                     }

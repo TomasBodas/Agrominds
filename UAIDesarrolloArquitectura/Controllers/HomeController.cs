@@ -23,6 +23,13 @@ namespace UAIDesarrolloArquitectura.Controllers
             return View("Index");
         }
 
+        // Nueva acción para Landing de clientes
+        [HttpGet]
+        public ActionResult Clientes()
+        {
+            return View("Clientes");
+        }
+
         // Nueva acción para la página "Nosotros" / AboutUs
         [HttpGet]
         public ActionResult Nosotros()

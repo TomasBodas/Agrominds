@@ -18,222 +18,112 @@
         if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); }
     }
 }
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroMinds</title>
-    <link rel="stylesheet" href="~/Content/Site.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;700&display=swap" rel="stylesheet">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>AgroMinds</title>
+ <link rel="stylesheet" href="~/Content/Site.css">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;700&display=swap" rel="stylesheet">
+ <style>
+ #cookieConsentModal { position: fixed; bottom:20px; left:20px; right:20px; max-width:980px; margin:0 auto; background:#1E88E5; color:#ffffff; border-radius:8px; box-shadow:06px24px rgba(0,0,0,0.2); padding:18px; display:none; z-index:9999; font-family:'Chivo', Arial, sans-serif; }
+ #cookieConsentModal a { color:#BBDEFB; text-decoration:underline; }
+ #cookieConsentModal .consent-content { display:flex; gap:12px; align-items:center; }
+ #cookieConsentModal p { margin:0; }
+ #cookieConsentModal .actions { margin-left:auto; display:flex; gap:8px; }
+ #cookieConsentModal .btn { padding:8px12px; border-radius:4px; border:none; cursor:pointer; font-weight:600; }
+ #cookieConsentModal .btn-accept { background:#0D47A1; color:#fff; }
+ #cookieConsentModal .btn-decline { background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.18); }
+ @@media (max-width:600px){ #cookieConsentModal{ left:12px; right:12px; bottom:12px; padding:12px;} #cookieConsentModal .consent-content{ flex-direction:column; align-items:stretch;} #cookieConsentModal .actions{ margin-left:0; justify-content:flex-end;} }
 
-    <style>
-        /* Cookie consent modal styles (blue theme) */
-        #cookieConsentModal {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            max-width: 980px;
-            margin: 0 auto;
-            background: #1E88E5; /* primary blue */
-            color: #ffffff; /* white text */
-            border-radius: 8px;
-            box-shadow: 06px 24px rgba(0, 0, 0, 0.2);
-            padding: 18px;
-            display: none;
-            z-index: 9999;
-            font-family: 'Chivo', Arial, sans-serif;
-        }
-
-        #cookieConsentModal a {
-            color: #BBDEFB;
-            text-decoration: underline;
-        }
-
-        #cookieConsentModal .consent-content {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        #cookieConsentModal p {
-            margin: 0;
-            color: #ffffff;
-        }
-
-        #cookieConsentModal .actions {
-            margin-left: auto;
-            display: flex;
-            gap: 8px;
-        }
-
-        #cookieConsentModal .btn {
-            padding: 8px 12px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        #cookieConsentModal .btn-accept {
-            background: #0D47A1; /* darker blue */
-            color: white;
-        }
-
-        #cookieConsentModal .btn-decline {
-            background: rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-
-        @@media (max-width: 600px) {
-            #cookieConsentModal {
-                left: 12px;
-                right: 12px;
-                bottom: 12px;
-                padding: 12px;
-            }
-
-            #cookieConsentModal .consent-content {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            #cookieConsentModal .actions {
-                margin-left: 0;
-                justify-content: flex-end;
-            }
-        }
-    </style>
+ /* simple style for dropdown */
+ .nav-select { padding:6px8px; border-radius:6px; border:1px solid #ccc; font-family:'Chivo', Arial, sans-serif; margin-left:10px; }
+ </style>
 </head>
-
 <body>
-    <nav class="barra">
-        @if (Services.SessionManager.IsLogged())
-        {
-            <div id="opciones" class="opciones">
-                <a href="@Url.Action("Logout", "Home")">@translator.GetTraduction(service, "Logout")</a>
-                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora", "Bitacora")">@translator.GetTraduction(service, "Log")</a>
-                <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios", "ABM")">@translator.GetTraduction(service, "ManageUser")</a>
-                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore", "Backup")">@translator.GetTraduction(service, "Restoredb")</a>
-                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma", "Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
-                <a style="display:none;" id="crearperfiles" href="@Url.Action("CrearPerfiles", "CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
-                <a style="display:none;" id="asignarperfiles" href="@Url.Action("AsignarPerfil", "AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
-                <script type="text/javascript">
-                    @foreach (string permission in Services.SessionManager.GetInstance.User.permissionList)
-                    {
-                        <text>document.getElementById('@permission').style.display = 'block';</text>
-                    }
-                </script>
-            </div>
-            <div class="opciones">
-                <img src="~/assets/user-image-with-black-background-svgrepo-com.svg" width="30px" />
-                <p style="color: black;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p>
-            </div>
-        }
-        else
-        {
-            <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Login")</a>
-            <a href="@Url.Action("Register", "Register")">@translator.GetTraduction(service, "Register")</a>
-        }
-
-        <form>
-            <select id="option" onchange="enviarValor()">
-                @foreach (Services.Idioma.Language l in service.GetLanguages())
-                {
-                    if (service.SelectedLanguage.Id == l.Id)
-                    {
-                        <option value="@l.Id" selected="selected">@translator.GetTraduction(service, l.Name)</option>
-                    }
-                    else
-                    {
-                        <option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>
-                    }
-                }
-            </select>
-        </form>
-    </nav>
-
-    <header>
-        <h1 style="color:#2E7D32;">AgroMinds</h1>
-    </header>
-    <nav class="menu-secundario">
-        <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
-        <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
-        <a href="@Url.Action("Servicios", "Home")">@translator.GetTraduction(service, "Services")</a>
-        <a href="@Url.Action("Nosotros", "Home")">@translator.GetTraduction(service, "AboutUs")</a>
-        <a href="@Url.Action("Contact", "Home")">@translator.GetTraduction(service, "Contact")</a>
-    </nav>
-
-
-    <div class="container" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 40px; margin-top: 40px;">
-        <div id="descripcion" style="max-width: 500px; text-align: left; line-height: 1.6;">
-            <h2>@translator.GetTraduction(service, "Promo1")</h2>
-            <p>@translator.GetTraduction(service, "Promo2text")</p>
-            <p>@translator.GetTraduction(service, "Promo3text")</p>
-            <p>@translator.GetTraduction(service, "Promo4text")</p>
-            <p>@translator.GetTraduction(service, "Promo5text")</p>
-            <p>@translator.GetTraduction(service, "Promo6text")</p>
-        </div>
-        <div style="flex-shrink: 0;">
-            <img src="~/assets/robots.png" alt="AgroMinds Logo"
-                 style="max-width: 300px; height: auto; border-radius: 10px;">
-        </div>
-    </div>
-
-    <footer style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #2E7D32; color: white; padding: 10px; text-align: center;">
-        © 2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.
-    </footer>
-
-    <!-- Cookie consent modal markup -->
-    <div id="cookieConsentModal" role="dialog" aria-labelledby="cookieConsentTitle" aria-describedby="cookieConsentDesc">
-        <div class="consent-content">
-            <div style="max-width:760px;">
-                <strong id="cookieConsentTitle">Consentimiento de cookies</strong>
-                <p id="cookieConsentDesc">Utilizamos cookies propias y de terceros para mejorar su experiencia. Si acepta, usaremos cookies para análisis y personalización. Puede cambiar su preferencia en cualquier momento.</p>
-                <a href="@Url.Action("Privacy", "Home")">Leer más</a>
-            </div>
-            <div class="actions">
-                <button id="declineCookies" class="btn btn-decline">Rechazar</button>
-                <button id="acceptCookies" class="btn btn-accept">Aceptar</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="~/Scripts/scriptIdioma.js"></script>
-
-    <script>
-        (function() {
-            var key = 'cookieConsentAgrominds';
-            function hasConsent() {
-                try { return localStorage.getItem(key) === 'accepted'; } catch (e) { return false; }
-            }
-            function setConsent(value) {
-                try { localStorage.setItem(key, value); } catch (e) { }
-            }
-            function showModal() {
-                var m = document.getElementById('cookieConsentModal');
-                if (m) m.style.display = 'block';
-            }
-            function hideModal() {
-                var m = document.getElementById('cookieConsentModal');
-                if (m) m.style.display = 'none';
-            }
-
-            document.addEventListener('DOMContentLoaded', function() {
-                if (!hasConsent()) {
-                    showModal();
-                }
-
-                var acceptBtn = document.getElementById('acceptCookies');
-                var declineBtn = document.getElementById('declineCookies');
-
-                if (acceptBtn) acceptBtn.addEventListener('click', function() { setConsent('accepted'); hideModal(); });
-                if (declineBtn) declineBtn.addEventListener('click', function() { setConsent('declined'); hideModal(); });
-            });
-        })();
-    </script>
+ <nav class="barra">
+ @if (Services.SessionManager.IsLogged())
+ {
+ <div id="opciones" class="opciones" style="display:flex; align-items:center; gap:10px;">
+ <a href="@Url.Action("Logout", "Home")" style="color:white;">@translator.GetTraduction(service, "Logout")</a>
+ <select id="navOptions" class="nav-select" onchange="navigateOption()">
+ <option value="" selected disabled>Opciones</option>
+ @* Build options only for permitted items *@
+ @foreach (string permission in Services.SessionManager.GetInstance.User.permissionList)
+ {
+ switch (permission)
+ {
+ case "bitacora": <option value="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</option>; break;
+ case "abmusuarios": <option value="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</option>; break;
+ case "restore": <option value="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</option>; break;
+ case "1001": <option value="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</option>; break;
+ case "1002": <option value="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</option>; break;
+ case "1003": <option value="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</option>; break;
+ }
+ }
+ </select>
+ </div>
+ <div class="opciones">
+ <p style="color: white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p>
+ </div>
+ }
+ else
+ {
+ <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Login")</a>
+ <a href="@Url.Action("Register", "Register")">@translator.GetTraduction(service, "Register")</a>
+ }
+ <form>
+ <select id="option" onchange="enviarValor()">
+ @foreach (Services.Idioma.Language l in service.GetLanguages())
+ {
+ if (service.SelectedLanguage.Id == l.Id)
+ {<option value="@l.Id" selected="selected">@translator.GetTraduction(service, l.Name)</option>}
+ else
+ {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>}
+ }
+ </select>
+ </form>
+ </nav>
+ <header><h1 style="color:#2E7D32;">AgroMinds</h1></header>
+ <nav class="menu-secundario">
+ <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
+ <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
+ <a href="@Url.Action("Servicios", "Home")">@translator.GetTraduction(service, "Services")</a>
+ <a href="@Url.Action("Nosotros", "Home")">@translator.GetTraduction(service, "AboutUs")</a>
+ <a href="@Url.Action("Contact", "Home")">@translator.GetTraduction(service, "Contact")</a>
+ </nav>
+ <div class="container" style="display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:40px; margin-top:40px;">
+ <div id="descripcion" style="max-width:500px; text-align:left; line-height:1.6;">
+ <h2>@translator.GetTraduction(service, "Promo1")</h2>
+ <p>@translator.GetTraduction(service, "Promo2text")</p>
+ <p>@translator.GetTraduction(service, "Promo3text")</p>
+ <p>@translator.GetTraduction(service, "Promo4text")</p>
+ <p>@translator.GetTraduction(service, "Promo5text")</p>
+ <p>@translator.GetTraduction(service, "Promo6text")</p>
+ </div>
+ <div style="flex-shrink:0;">
+ <img src="~/assets/robots.png" alt="AgroMinds Logo" style="max-width:300px; height:auto; border-radius:10px;" />
+ </div>
+ </div>
+ <footer style="bottom:0; left:0; width:100%; background-color:#2E7D32; color:white; padding:10px; text-align:center;">©2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.</footer>
+ <div id="cookieConsentModal" role="dialog" aria-labelledby="cookieConsentTitle" aria-describedby="cookieConsentDesc">
+ <div class="consent-content">
+ <div style="max-width:760px;">
+ <strong id="cookieConsentTitle">Consentimiento de cookies</strong>
+ <p id="cookieConsentDesc">Utilizamos cookies propias y de terceros para mejorar su experiencia. Si acepta, usaremos cookies para análisis y personalización. Puede cambiar su preferencia en cualquier momento.</p>
+ <a href="@Url.Action("Privacy", "Home")">Leer más</a>
+ </div>
+ <div class="actions">
+ <button id="declineCookies" class="btn btn-decline">Rechazar</button>
+ <button id="acceptCookies" class="btn btn-accept">Aceptar</button>
+ </div>
+ </div>
+ </div>
+ <script src="~/Scripts/scriptIdioma.js"></script>
+ <script>
+ function navigateOption(){ var sel=document.getElementById('navOptions'); if(sel && sel.value){ window.location=sel.value; } }
+ (function(){ var key='cookieConsentAgrominds'; function hasConsent(){ try{return localStorage.getItem(key)==='accepted';}catch(e){return false;} } function setConsent(v){ try{localStorage.setItem(key,v);}catch(e){} } function showModal(){ var m=document.getElementById('cookieConsentModal'); if(m) m.style.display='block'; } function hideModal(){ var m=document.getElementById('cookieConsentModal'); if(m) m.style.display='none'; } document.addEventListener('DOMContentLoaded', function(){ if(!hasConsent()) showModal(); var acceptBtn=document.getElementById('acceptCookies'); var declineBtn=document.getElementById('declineCookies'); if(acceptBtn) acceptBtn.addEventListener('click', function(){ setConsent('accepted'); hideModal(); }); if(declineBtn) declineBtn.addEventListener('click', function(){ setConsent('declined'); hideModal(); }); }); })();
+ </script>
 </body>
 </html>

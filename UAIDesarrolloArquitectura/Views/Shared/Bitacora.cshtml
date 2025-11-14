@@ -116,14 +116,14 @@
     <nav class="barra">
         @if (Services.SessionManager.IsLogged())
         {
-            <div class="opciones">
+            <div id="opciones" class="opciones">
                 <a href="@Url.Action("Logout", "Home")">@translator.GetTraduction(service, "Logout")</a>
                 <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora", "Bitacora")">@translator.GetTraduction(service, "Log")</a>
                 <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios", "ABM")">@translator.GetTraduction(service, "ManageUser")</a>
                 <a style="display:none;" id="restore" href="@Url.Action("BackupRestore", "Backup")">@translator.GetTraduction(service, "Restoredb")</a>
                 <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma", "Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
-                <a style="display:none;" id="crearperfiles" href="@Url.Action("CrearPerfiles", "CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
-                <a style="display:none;" id="asignarperfiles" href="@Url.Action("AsignarPerfil", "AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
+                <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles", "CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
+                <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil", "AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
                 <script type="text/javascript">
                      @foreach (string permission in Services.SessionManager.GetInstance.User.permissionList)
                      {
@@ -134,13 +134,13 @@
                 </script>
             </div>
             <div class="opciones">
-                <img src="~/assets/user-image-with-black-background-svgrepo-com.svg" width="30px" />
-                <p style='color: black; white-space: nowrap;'>@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p>
+                <p style="color:white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p>
             </div>
         }
         else
         {
         <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Login")</a>
+        <a href="@Url.Action("Register", "Register")">@translator.GetTraduction(service, "Register")</a>
         }
         <form>
             <select id="option" data-language-url="@Url.Action("SetLanguage", "Idioma")" onchange="enviarValor()">
@@ -161,7 +161,7 @@
         </form>
     </nav>
     <header>
-        <h1 style="color:#2E7D32;">Agrominds</h1>
+        <h1 style="color:#2E7D32;">AgroMinds</h1>
     </header>
     <nav class="menu-secundario">
         <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
@@ -177,7 +177,7 @@
             <div class="contenedor-filtros">
                 @Html.Label(translator.GetTraduction(service, "Since"))<input type="date" id="fechaInicio" name="fechaInicio" />
                 @Html.Label(translator.GetTraduction(service, "Until"))<input type="date" id="fechaFinal" name="fechaFinal" />
-                @Html.Label(translator.GetTraduction(service, "Module"))<input type="text" id="modulo " name="modulo" />
+                @Html.Label(translator.GetTraduction(service, "Module"))<input type="text" id="modulo" name="modulo" />
                 <button type="submit" class="boton">@translator.GetTraduction(service, "FilterText")</button>
                 @* Export button at same level as filters *@
                 @using (Html.BeginForm("ExportXML", "Bitacora", FormMethod.Post, new { @class = "export-form" }))
@@ -211,10 +211,10 @@
                 }
             </tbody>
         </table>
-        <script src="~/Scripts/scriptIdioma.js"></script>
     </div>
     <footer>
         ©2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.
     </footer>
+    <script src="~/Scripts/scriptIdioma.js"></script>
 </body>
 </html>

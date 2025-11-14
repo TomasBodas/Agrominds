@@ -82,8 +82,9 @@ namespace DAL
                 try
                 {
                     connection.Open();
-                    string query = "INSERT INTO traduccion (IdiomaId, Tag, Texto) VALUES (@id, @tag, '')";
-                    foreach (string s in tags)
+                    // Evitar duplicados por (IdiomaId, Tag)
+                    string query = "IF NOT EXISTS(SELECT 1 FROM traduccion WHERE IdiomaId=@id AND Tag=@tag) INSERT INTO traduccion (IdiomaId, Tag, Texto) VALUES (@id, @tag, '')";
+                    foreach (string s in tags.Distinct())
                     {
                         using (SqlCommand command = new SqlCommand(query, connection))
                         {
@@ -117,7 +118,7 @@ namespace DAL
                 }
                 return int.Parse(dt.Rows[0].ItemArray[0].ToString());
             }
-        } 
+        }
         public void AddTagForItself(List<int> ids, string name)
         {
             using (SqlConnection connection = new SqlConnection(CONNECTION_STRING))
@@ -125,7 +126,7 @@ namespace DAL
                 try
                 {
                     connection.Open();
-                    string query = "INSERT INTO traduccion (IdiomaId, Tag, Texto) VALUES (@id, @tag, '')";
+                    string query = "IF NOT EXISTS(SELECT 1 FROM traduccion WHERE IdiomaId=@id AND Tag=@tag) INSERT INTO traduccion (IdiomaId, Tag, Texto) VALUES (@id, @tag, '')";
                     foreach (int i in ids)
                     {
                         using (SqlCommand command = new SqlCommand(query, connection))

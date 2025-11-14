@@ -49,6 +49,13 @@ namespace UAIDesarrolloArquitectura.Controllers
                             }
                             else dalUser.EventLog(user.id, DateTime.Now.ToString(), "Inicio de sesión", "Se inició sesión");
                             checkDigitsManager.SetCheckDigits();
+
+                            // Redireccion directa para perfil Cliente
+                            if (SessionManager.GetInstance.User.profile != null &&
+                                string.Equals(SessionManager.GetInstance.User.profile.Name, "Cliente", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return RedirectToAction("Clientes", "Home");
+                            }
                         }
                         else throw new Exception();
                         return RedirectToAction("Index", "Home");
