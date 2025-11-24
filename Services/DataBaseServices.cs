@@ -12,7 +12,7 @@ namespace Services
 {
     public static class DataBaseServices
     {
-        private static readonly string CONNECTION_STRING = "Data Source=DESKTOP-4OC5GG6\\SQLEXPRESS;Initial Catalog = Bersonal; Integrated Security = True; Connect Timeout = 30; Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+        private static readonly string CONNECTION_STRING = "Data Source=DESKTOP-4OC5GG6\\SQLEXPRESS;Initial Catalog = Agrominds; Integrated Security = True; Connect Timeout = 30; Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
         public static string getConnectionString()
         {
@@ -25,7 +25,7 @@ namespace Services
                 using (SqlConnection connection = new SqlConnection(CONNECTION_STRING))
                 {
                     connection.Open();
-                    string backupQuery = $"BACKUP Database Bersonal TO DISK = 'D:\\backups\\MiBackup - {DateTime.Now.ToString("yyyyMMddHHmmss")}.bak'";
+                    string backupQuery = $"BACKUP Database Agrominds TO DISK = 'D:\\backups\\MiBackup - {DateTime.Now.ToString("yyyyMMddHHmmss")}.bak'";
                     using (SqlCommand command = new SqlCommand(backupQuery, connection))
                     {
                         command.ExecuteNonQuery();
@@ -44,22 +44,22 @@ namespace Services
                     //Abrir la conexión
                     connection.Open();
                     //Ponemos la base de datos en estado offline
-                    SqlCommand command = new SqlCommand("alter database Bersonal set offline with rollback immediate", connection);
+                    SqlCommand command = new SqlCommand("alter database Agrominds set offline with rollback immediate", connection);
                     command.ExecuteNonQuery();
                     try
                     {
                         //Intentamos restaurarla base de datos
-                        command = new SqlCommand($"RESTORE DATABASE Bersonal FROM DISK = '{pPath}'", connection);
+                        command = new SqlCommand($"RESTORE DATABASE Agrominds FROM DISK = '{pPath}'", connection);
                         command.ExecuteNonQuery();
                     }
-                    catch(Exception exRestore)
+                    catch(Exception)
                     {
                         // Intentamos poner la base de datos online nuevamente
-                        SqlCommand onlineCommand = new SqlCommand("ALTER DATABASE Bersonal SET ONLINE", connection);
+                        SqlCommand onlineCommand = new SqlCommand("ALTER DATABASE Agrominds SET ONLINE", connection);
                         onlineCommand.ExecuteNonQuery();
                         return false;
                     }
-                    command = new SqlCommand("alter database Bersonal set online", connection);
+                    command = new SqlCommand("alter database Agrominds set online", connection);
                     command.ExecuteNonQuery();
                 }
                 return true;

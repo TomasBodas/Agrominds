@@ -8,11 +8,14 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using UAIDesarrolloArquitectura.ServicePrecios;
+using Services.Models; // agregado para Robot
 
 namespace UAIDesarrolloArquitectura.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly BLL_Robot _bllRobot = new BLL_Robot(); // BLL para robots y estados
+
         public ActionResult Startup()
         {
             return View("Index");
@@ -25,9 +28,12 @@ namespace UAIDesarrolloArquitectura.Controllers
 
         // Nueva acción para Landing de clientes
         [HttpGet]
-        public ActionResult Clientes()
+        public ActionResult Robots()
         {
-            return View("Clientes");
+            // Obtener robots y estados vía BLL (ya no directamente desde DAL)
+            IList<Robot> robots = _bllRobot.GetAllRobots();
+            ViewBag.EstadosRobot = _bllRobot.GetEstadosRobot();
+            return View("Robots", robots);
         }
 
         // Nueva acción para la página "Nosotros" / AboutUs
@@ -79,6 +85,45 @@ namespace UAIDesarrolloArquitectura.Controllers
             bll_dvmanager.SetCheckDigits();
             SessionManager.logout();
             return View("Index");
+        }
+
+        // Nueva acción para cargar mantenimientos de robots
+        [HttpGet]
+        public ActionResult Mantenimientos()
+        {
+            var dalRobot = new DAL_Robot();
+            var dalList = dalRobot.GetAllRobots();
+            var mantenimientosPorRobot = new Dictionary<int, IList<MantenimientoRobot>>();
+            foreach (var r in dalList)
+            {
+                var mts = dalRobot.GetMaintenances(r.Id, null, null,100);
+                mantenimientosPorRobot[r.Id] = mts;
+            }
+            ViewBag.Robots = dalList; // lista de robots para referencias
+            return View("Mantenimientos", mantenimientosPorRobot);
+        }
+
+        // Nueva acción para Telemetría (reemplaza Estadísticas)
+        [HttpGet]
+        public ActionResult Telemetria()
+        {
+            var dalRobot = new DAL_Robot();
+            var robots = dalRobot.GetAllRobots();
+            var telemetriaPorRobot = new Dictionary<int, IList<TelemetriaRobot>>();
+            foreach (var r in robots)
+            {
+                var tel = dalRobot.GetTelemetry(r.Id, null, null,100);
+                telemetriaPorRobot[r.Id] = tel;
+            }
+            ViewBag.Robots = robots;
+            return View("Telemetria", telemetriaPorRobot);
+        }
+
+        // Nueva acción ContactUs para sidebar
+        [HttpGet]
+        public ActionResult ContactUs()
+        {
+            return View("ContactUs");
         }
     }
 }

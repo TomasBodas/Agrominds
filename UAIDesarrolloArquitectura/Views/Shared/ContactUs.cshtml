@@ -1,0 +1,126 @@
+﻿@using Services.Models
+<!DOCTYPE html>
+<html lang="es">
+@{
+ ViewBag.Title = "ContactUs";
+ Services.Idioma.Translator translator = new Services.Idioma.Translator();
+ UAIDesarrolloArquitectura.Controllers.IdiomaController lC = new UAIDesarrolloArquitectura.Controllers.IdiomaController();
+ lC.InitializeController();
+ Services.LanguageService service = lC.GetService();
+ service.Susbcribe(translator);
+ if (Services.SessionManager.IsLogged()) { service.ChangeLanguage((Services.SessionManager.GetInstance.User.LanguageId).ToString()); }
+ else { if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); } }
+}
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>Contacto</title>
+ <link rel="stylesheet" href="~/Content/Site.css" />
+ <link rel="preconnect" href="https://fonts.googleapis.com" />
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+ <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;700&display=swap" rel="stylesheet" />
+ <style>
+ body { font-family:'Chivo', Arial, sans-serif; background:#f5faf5; }
+ .layout { display:flex; min-height: calc(100vh -60px); }
+ .sidebar { width:240px; background:#e8f5e9; border-right:1px solid #a5d6a7; padding:16px; position:sticky; top:0; height:100vh; }
+ .sidebar a { display:flex; align-items:center; gap:8px; color:#1b5e20; text-decoration:none; padding:8px 10px; border-radius:6px; margin-bottom:6px; font-weight:600; }
+ .sidebar a .ico { width:18px; height:18px; display:inline-flex; }
+ .sidebar a:hover { background:#c8e6c9; }
+ .content { flex:1; padding:32px 48px 40px; }
+ .wrapper { max-width:980px; margin:0 auto; }
+ .card { background:#fff; border-left:4px solid #2E7D32; padding:18px; border-radius:8px; box-shadow:08px 24px rgba(46,125,50,0.08); margin-bottom:22px; }
+ h2 { color:#2E7D32; margin:0014px; }
+ .flex { display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start; }
+ .col { min-width:240px; }
+ .col h3 { margin:008px; color:#2E7D32; }
+ .col p { margin:4px 0; }
+ a.link { color:#2E7D32; text-decoration:none; }
+ a.link:hover { text-decoration:underline; }
+ form label { font-weight:600; }
+ form input, form textarea { width:100%; padding:8px; margin:6px 0; border:1px solid #c8e6c9; border-radius:6px; }
+ form button { background:#2E7D32; color:#fff; padding:10px 16px; border:none; border-radius:4px; cursor:pointer; }
+ form button:hover { background:#1b5e20; }
+ .empty { background:#fff; border:1px dashed #cfe0cf; padding:20px; border-radius:14px; text-align:center; color:#1b5e20; font-weight:600; }
+ </style>
+</head>
+<body>
+ <nav class="barra">
+ @if (Services.SessionManager.IsLogged())
+ {
+ <div id="opciones" class="opciones">
+ <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service, "Logout")</a>
+ <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</a>
+ <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</a>
+ <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</a>
+ <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
+ <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
+ <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
+ <script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
+ </div>
+ <div class="opciones"><p style="color:white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
+ }
+ else
+ {
+ <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service, "Login")</a>
+ <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
+ }
+ <form>
+ <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages())
+ {
+ if (service.SelectedLanguage.Id == l.Id)
+ {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>}
+ else
+ {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>}
+ }</select>
+ </form>
+ </nav>
+ <div class="layout">
+     <aside class="sidebar">
+         <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
+         <a href="@Url.Action("Mantenimientos","Home")">@translator.GetTraduction(service, "Maintenance")</a>
+         <a href="@Url.Action("Telemetria","Home")">@translator.GetTraduction(service, "Telemetry")</a>
+         <a href="@Url.Action("ContactUs","Home")" class="active">@translator.GetTraduction(service, "Contact")</a>
+     </aside>
+ <main class="content">
+ <div class="wrapper">
+ <div class="card">
+ <h2>Contacto</h2>
+ <div class="flex">
+ <div class="col">
+ <h3>AgroMinds</h3>
+ <p><strong>Dirección:</strong> Ruta Provincial9, Km1234, Córdoba, Argentina</p>
+ <p><strong>Teléfono:</strong> <a class="link" href="tel:+5491112345678">+5491112345678</a></p>
+ <p><strong>Email:</strong> <a class="link" href="mailto:contacto@agrominds.com.ar">contacto@agrominds.com.ar</a></p>
+ <p><strong>Horario:</strong> Lun - Vie9:00 -18:00</p>
+ </div>
+ <div class="col" style="flex:1; min-width:220px;">
+ <h3>Soporte & Ventas</h3>
+ <p><strong>Soporte:</strong> <a class="link" href="mailto:soporte@agrominds.com.ar">soporte@agrominds.com.ar</a></p>
+ <p><strong>Ventas:</strong> <a class="link" href="mailto:ventas@agrominds.com.ar">ventas@agrominds.com.ar</a></p>
+ <p style="margin:8px 0 0;">Síguenos:</p>
+ <p style="margin:6px 0 0;">
+ <a class="link" href="#" style="margin-right:8px;">Twitter</a>
+ <a class="link" href="#" style="margin-right:8px;">LinkedIn</a>
+ <a class="link" href="#">Instagram</a>
+ </p>
+ </div>
+ </div>
+ </div>
+ <div class="card">
+ <h2>Formulario</h2>
+ <form method="post" action="@Url.Action("SendContact","Home")">
+ <label for="name">Nombre</label>
+ <input type="text" id="name" name="name" required />
+ <label for="email">Email</label>
+ <input type="email" id="email" name="email" required />
+ <label for="message">Mensaje</label>
+ <textarea id="message" name="message" rows="6" required></textarea>
+ <button type="submit">Enviar</button>
+ </form>
+ </div>
+ </div>
+ </main>
+ </div>
+ <footer>©2026 AgroMinds — Tecnología agrícola inteligente.</footer>
+</body>
+</html>

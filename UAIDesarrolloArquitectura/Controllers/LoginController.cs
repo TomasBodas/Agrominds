@@ -54,7 +54,7 @@ namespace UAIDesarrolloArquitectura.Controllers
                             if (SessionManager.GetInstance.User.profile != null &&
                                 string.Equals(SessionManager.GetInstance.User.profile.Name, "Cliente", StringComparison.OrdinalIgnoreCase))
                             {
-                                return RedirectToAction("Clientes", "Home");
+                                return RedirectToAction("Robots", "Home"); // cambiado desde 'Clientes'
                             }
                         }
                         else throw new Exception();

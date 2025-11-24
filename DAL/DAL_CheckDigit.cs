@@ -120,7 +120,7 @@ namespace DAL
                     command.ExecuteNonQuery();
                     sqlConnection.Close();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     DAL_User dalUser = new DAL_User();
                 }
@@ -164,7 +164,7 @@ namespace DAL
                     updateCommand.ExecuteNonQuery();
                     sqlConnection.Close();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     DAL_User dalUser = new DAL_User();
                 }

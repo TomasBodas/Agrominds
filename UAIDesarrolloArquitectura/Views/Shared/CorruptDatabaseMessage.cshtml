@@ -156,59 +156,6 @@
 </head>
 
 <body>
-<nav class="barra">
-    @if(Services.SessionManager.IsLogged())
-    {
-        <div id="opciones" class="opciones">
-            <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service,"Logout")</a>
-            <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service,"Log")</a>
-            <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service,"ManageUser")</a>
-            <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service,"Restoredb")</a>
-            <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service,"ManageLanguage")</a>
-            <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service,"CreateProfile")</a>
-            <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service,"AssignProfile")</a>
-            <script type="text/javascript">
-                @foreach(string permission in Services.SessionManager.GetInstance.User.permissionList)
-                {
-                    <text>document.getElementById('@permission').style.display='block';</text>
-                }
-            </script>
-        </div>
-        <div class="opciones">
-            <p style="color:white;">@translator.GetTraduction(service,"Welcome"), @Services.SessionManager.GetInstance.User.Name</p>
-        </div>
-    }
-    else
-    {
-        <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service,"Login")</a>
-        <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service,"Register")</a>
-    }
-    <form>
-        <select id="option" onchange="enviarValor()">
-            @foreach(Services.Idioma.Language l in service.GetLanguages())
-            {
-                if(service.SelectedLanguage.Id==l.Id)
-                {
-                    <option value="@l.Id" selected>@translator.GetTraduction(service,l.Name)</option>
-                }
-                else
-                {
-                    <option value="@l.Id">@translator.GetTraduction(service,l.Name)</option>
-                }
-            }
-        </select>
-    </form>
-</nav>
-<header>
-    <h1 style="color:#2E7D32;">AgroMinds</h1>
-</header>
-<nav class="menu-secundario">
-    <a href="@Url.Action("Index","Home")">@translator.GetTraduction(service,"Main")</a>
-    <a href="@Url.Action("Plans","Home")">@translator.GetTraduction(service,"Plans")</a>
-    <a href="@Url.Action("Servicios","Home")">@translator.GetTraduction(service,"Services")</a>
-    <a href="@Url.Action("Nosotros","Home")">@translator.GetTraduction(service,"AboutUs")</a>
-    <a href="@Url.Action("Contact","Home")">@translator.GetTraduction(service,"Contact")</a>
-</nav>
 <div class="message">
     @if (Services.SessionManager.GetInstance != null && Services.SessionManager.GetInstance.User.Name == "webmaster")
     {
@@ -250,6 +197,5 @@
         <a href="@Url.Action("Login", "Login")">@translator.GetTraduction(service, "Leave")</a>
     }
 </div>
-<footer>©2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.</footer>
 </body>
 </html>

@@ -158,6 +158,7 @@
     <Compile Include="Controllers\IdiomaController.cs" />
     <Compile Include="Controllers\RegisterController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\RobotController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -240,7 +241,11 @@
     <Content Include="Views\Home\AboutUs.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Privacy.cshtml" />
-    <Content Include="Views\Shared\Clientes.cshtml" />
+    <Content Include="Views\Shared\Mantenimientos.cshtml" />
+    <Content Include="Views\Shared\Robots.cshtml" />
+    <Content Include="Views\Shared\Telemetria.cshtml" />
+    <Content Include="Views\Shared\ContactUs.cshtml" />
+    <Content Include="Views\Shared\RobotDetalle.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

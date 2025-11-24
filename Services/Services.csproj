@@ -47,6 +47,11 @@
     <Compile Include="Idioma\Translator.cs" />
     <Compile Include="LanguageService.cs" />
     <Compile Include="Models\Log.cs" />
+    <Compile Include="Models\MantenimientoRobot.cs" />
+    <Compile Include="Models\ReporteRobot.cs" />
+    <Compile Include="Models\Robot.cs" />
+    <Compile Include="Models\TareaRobot.cs" />
+    <Compile Include="Models\TelemetriaRobot.cs" />
     <Compile Include="PasswordEncrypter.cs" />
     <Compile Include="Perfiles\Auth.cs" />
     <Compile Include="Perfiles\Permission.cs" />
