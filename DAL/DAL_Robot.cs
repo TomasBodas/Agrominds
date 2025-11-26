@@ -18,7 +18,7 @@ namespace DAL
 		{
 			var list = new List<Robot>();
 			using (var cn = new SqlConnection(CONNECTION_STRING))
-			using (var cmd = new SqlCommand("SELECT Id, Nombre, NumeroSerie, Bateria, IdEstadoRobot, FechaAlta FROM robot", cn))
+			using (var cmd = new SqlCommand("SELECT Id, Nombre, NumeroSerie, Bateria, IdEstadoRobot, FechaAlta, UltimaConexion, Latitud, Longitud FROM robot", cn))
 			{
 				cn.Open();
 				using (var rd = cmd.ExecuteReader())
@@ -32,7 +32,10 @@ namespace DAL
 							NumeroSerie = rd.IsDBNull(2) ? null : rd.GetString(2),
 							Bateria = rd.IsDBNull(3) ?0 : rd.GetInt32(3),
 							IdEstadoRobot = rd.IsDBNull(4) ?0 : rd.GetInt32(4),
-							FechaAlta = rd.IsDBNull(5) ? (DateTime?)null : rd.GetDateTime(5)
+							FechaAlta = rd.IsDBNull(5) ? (DateTime?)null : rd.GetDateTime(5),
+							UltimaConexion = rd.IsDBNull(6) ? (DateTime?)null : rd.GetDateTime(6),
+							Latitud = rd.IsDBNull(7) ? (decimal?)null : rd.GetDecimal(7),
+							Longitud = rd.IsDBNull(8) ? (decimal?)null : rd.GetDecimal(8)
 						});
 					}
 				}
@@ -44,7 +47,7 @@ namespace DAL
 		{
 			Robot robot = null;
 			using (var cn = new SqlConnection(CONNECTION_STRING))
-			using (var cmd = new SqlCommand("SELECT Id, Nombre, NumeroSerie, Bateria, IdEstadoRobot, FechaAlta FROM robot WHERE Id=@id", cn))
+			using (var cmd = new SqlCommand("SELECT Id, Nombre, NumeroSerie, Bateria, IdEstadoRobot, FechaAlta, UltimaConexion, Latitud, Longitud FROM robot WHERE Id=@id", cn))
 			{
 				cmd.Parameters.AddWithValue("@id", id);
 				cn.Open();
@@ -59,7 +62,10 @@ namespace DAL
 							NumeroSerie = rd.IsDBNull(2) ? null : rd.GetString(2),
 							Bateria = rd.IsDBNull(3) ?0 : rd.GetInt32(3),
 							IdEstadoRobot = rd.IsDBNull(4) ?0 : rd.GetInt32(4),
-							FechaAlta = rd.IsDBNull(5) ? (DateTime?)null : rd.GetDateTime(5)
+							FechaAlta = rd.IsDBNull(5) ? (DateTime?)null : rd.GetDateTime(5),
+							UltimaConexion = rd.IsDBNull(6) ? (DateTime?)null : rd.GetDateTime(6),
+							Latitud = rd.IsDBNull(7) ? (decimal?)null : rd.GetDecimal(7),
+							Longitud = rd.IsDBNull(8) ? (decimal?)null : rd.GetDecimal(8)
 						};
 					}
 				}
@@ -70,14 +76,18 @@ namespace DAL
 		public int CreateRobot(Robot robot)
 		{
 			using (var cn = new SqlConnection(CONNECTION_STRING))
-			using (var cmd = new SqlCommand(@"INSERT INTO robot (Nombre, NumeroSerie, Bateria, IdEstadoRobot, FechaAlta) 
-				VALUES (@Nombre, @NumeroSerie, @Bateria, @Estado, @FechaAlta); SELECT SCOPE_IDENTITY();", cn))
+			using (var cmd = new SqlCommand(@"INSERT INTO robot (Nombre, NumeroSerie, Bateria, IdEstadoRobot, FechaAlta, UltimaConexion, Latitud, Longitud, IdUsuarioResponsable) 
+				VALUES (@Nombre, @NumeroSerie, @Bateria, @Estado, @FechaAlta, @UltimaConexion, @Latitud, @Longitud, @IdUsuarioResponsable); SELECT SCOPE_IDENTITY();", cn))
 			{
 				cmd.Parameters.AddWithValue("@Nombre", (object)robot.Nombre ?? DBNull.Value);
 				cmd.Parameters.AddWithValue("@NumeroSerie", (object)robot.NumeroSerie ?? DBNull.Value);
 				cmd.Parameters.AddWithValue("@Bateria", robot.Bateria);
 				cmd.Parameters.AddWithValue("@Estado", robot.IdEstadoRobot);
 				cmd.Parameters.AddWithValue("@FechaAlta", (object)robot.FechaAlta ?? DBNull.Value);
+				cmd.Parameters.AddWithValue("@UltimaConexion", (object)robot.UltimaConexion ?? DBNull.Value);
+				cmd.Parameters.AddWithValue("@Latitud", (object)robot.Latitud ?? DBNull.Value);
+				cmd.Parameters.AddWithValue("@Longitud", (object)robot.Longitud ?? DBNull.Value);
+				cmd.Parameters.AddWithValue("@IdUsuarioResponsable", robot.IdUsuarioResponsable);
 				cn.Open();
 				var id = cmd.ExecuteScalar();
 				return Convert.ToInt32(id);
@@ -87,7 +97,16 @@ namespace DAL
 		public void UpdateRobot(Robot robot)
 		{
 			using (var cn = new SqlConnection(CONNECTION_STRING))
-			using (var cmd = new SqlCommand(@"UPDATE robot SET Nombre=@Nombre, NumeroSerie=@NumeroSerie, Bateria=@Bateria, IdEstadoRobot=@Estado, FechaAlta=@FechaAlta WHERE Id=@Id", cn))
+			using (var cmd = new SqlCommand(@"UPDATE robot SET 
+				Nombre=@Nombre, 
+				NumeroSerie=@NumeroSerie, 
+				Bateria=@Bateria, 
+				IdEstadoRobot=@Estado, 
+				FechaAlta=COALESCE(@FechaAlta, FechaAlta), 
+				UltimaConexion=COALESCE(@UltimaConexion, UltimaConexion), 
+				Latitud=@Latitud, 
+				Longitud=@Longitud 
+				WHERE Id=@Id", cn))
 			{
 				cmd.Parameters.AddWithValue("@Id", robot.Id);
 				cmd.Parameters.AddWithValue("@Nombre", (object)robot.Nombre ?? DBNull.Value);
@@ -95,6 +114,9 @@ namespace DAL
 				cmd.Parameters.AddWithValue("@Bateria", robot.Bateria);
 				cmd.Parameters.AddWithValue("@Estado", robot.IdEstadoRobot);
 				cmd.Parameters.AddWithValue("@FechaAlta", (object)robot.FechaAlta ?? DBNull.Value);
+				cmd.Parameters.AddWithValue("@UltimaConexion", (object)robot.UltimaConexion ?? DBNull.Value);
+				cmd.Parameters.AddWithValue("@Latitud", (object)robot.Latitud ?? DBNull.Value);
+				cmd.Parameters.AddWithValue("@Longitud", (object)robot.Longitud ?? DBNull.Value);
 				cn.Open();
 				cmd.ExecuteNonQuery();
 			}
@@ -222,8 +244,8 @@ namespace DAL
 		public int CreateTask(TareaRobot t)
 		{
 			using (var cn = new SqlConnection(CONNECTION_STRING))
-			using (var cmd = new SqlCommand(@"INSERT INTO tarea_robot (IdRobot, IdTipoTarea, IdEstadoTarea, FechaProgramada, FechaInicio, FechaFin, ParametrosJSON) 
-				VALUES (@IdRobot, @IdTipoTarea, @IdEstadoTarea, @FechaProgramada, @FechaInicio, @FechaFin, @ParametrosJSON); SELECT SCOPE_IDENTITY();", cn))
+			using (var cmd = new SqlCommand(@"INSERT INTO tarea_robot (IdRobot, IdTipoTarea, IdEstadoTarea, FechaProgramada, FechaInicio, FechaFin, ParametrosJSON, Observaciones) 
+				VALUES (@IdRobot, @IdTipoTarea, @IdEstadoTarea, @FechaProgramada, @FechaInicio, @FechaFin, @ParametrosJSON, @Observaciones); SELECT SCOPE_IDENTITY();", cn))
 			{
 				cmd.Parameters.AddWithValue("@IdRobot", t.IdRobot);
 				cmd.Parameters.AddWithValue("@IdTipoTarea", t.IdTipoTarea);
@@ -232,6 +254,7 @@ namespace DAL
 				cmd.Parameters.AddWithValue("@FechaInicio", (object)t.FechaInicio ?? DBNull.Value);
 				cmd.Parameters.AddWithValue("@FechaFin", (object)t.FechaFin ?? DBNull.Value);
 				cmd.Parameters.AddWithValue("@ParametrosJSON", (object)t.ParametrosJSON ?? DBNull.Value);
+				cmd.Parameters.AddWithValue("@Observaciones", (object)t.Observaciones ?? DBNull.Value);
 				cn.Open();
 				var id = cmd.ExecuteScalar();
 				return Convert.ToInt32(id);
@@ -259,7 +282,7 @@ namespace DAL
 		public List<TareaRobot> GetTasks(int robotId, int? estadoTareaId = null, int top =200)
 		{
 			var list = new List<TareaRobot>();
-			var sql = "SELECT TOP (@Top) Id, IdRobot, IdTipoTarea, IdEstadoTarea, FechaProgramada, FechaInicio, FechaFin, ParametrosJSON FROM tarea_robot WHERE IdRobot=@IdRobot";
+			var sql = "SELECT TOP (@Top) Id, IdRobot, IdTipoTarea, IdEstadoTarea, FechaProgramada, FechaInicio, FechaFin, ParametrosJSON, Observaciones FROM tarea_robot WHERE IdRobot=@IdRobot";
 			if (estadoTareaId.HasValue) sql += " AND IdEstadoTarea=@Estado";
 			sql += " ORDER BY FechaProgramada DESC";
 			using (var cn = new SqlConnection(CONNECTION_STRING))
@@ -282,7 +305,8 @@ namespace DAL
 							FechaProgramada = rd.IsDBNull(4) ? (DateTime?)null : rd.GetDateTime(4),
 							FechaInicio = rd.IsDBNull(5) ? (DateTime?)null : rd.GetDateTime(5),
 							FechaFin = rd.IsDBNull(6) ? (DateTime?)null : rd.GetDateTime(6),
-							ParametrosJSON = rd.IsDBNull(7) ? null : rd.GetString(7)
+							ParametrosJSON = rd.IsDBNull(7) ? null : rd.GetString(7),
+							Observaciones = rd.IsDBNull(8) ? null : rd.GetString(8)
 						});
 					}
 				}
@@ -298,8 +322,8 @@ namespace DAL
 		public int CreateMaintenance(MantenimientoRobot m)
 		{
 			using (var cn = new SqlConnection(CONNECTION_STRING))
-			using (var cmd = new SqlCommand(@"INSERT INTO mantenimiento_robot (IdRobot, IdTipoMantenimiento, IdUsuarioResponsable, Fecha, Descripcion, DuracionHoras, CostoEstimado) 
-				VALUES (@IdRobot, @IdTipoMantenimiento, @IdUsuarioResponsable, @Fecha, @Descripcion, @DuracionHoras, @CostoEstimado); SELECT SCOPE_IDENTITY();", cn))
+			using (var cmd = new SqlCommand(@"INSERT INTO mantenimiento_robot (IdRobot, IdTipoMantenimiento, IdUsuarioResponsable, Fecha, Descripcion, DuracionHoras, CostoEstimado, Cerrado) 
+				VALUES (@IdRobot, @IdTipoMantenimiento, @IdUsuarioResponsable, @Fecha, @Descripcion, @DuracionHoras, @CostoEstimado,0); SELECT SCOPE_IDENTITY();", cn))
 			{
 				cmd.Parameters.AddWithValue("@IdRobot", m.IdRobot);
 				cmd.Parameters.AddWithValue("@IdTipoMantenimiento", m.IdTipoMantenimiento);
@@ -323,7 +347,8 @@ namespace DAL
 			if (duracionHoras.HasValue) setList.Add(" DuracionHoras=@DuracionHoras");
 			if (costoEstimado.HasValue) setList.Add(" CostoEstimado=@CostoEstimado");
 			if (descripcion != null) setList.Add(" Descripcion=@Descripcion");
-			if (setList.Count ==0) return;
+			// Marcar cerrado
+			setList.Add(" Cerrado=1");
 			var sql = "UPDATE mantenimiento_robot SET" + string.Join(",", setList) + " WHERE Id=@Id";
 			using (var cn = new SqlConnection(CONNECTION_STRING))
 			using (var cmd = new SqlCommand(sql, cn))
@@ -343,7 +368,7 @@ namespace DAL
 		public List<MantenimientoRobot> GetMaintenances(int robotId, DateTime? from = null, DateTime? to = null, int top =100)
 		{
 			var list = new List<MantenimientoRobot>();
-			var sql = "SELECT TOP (@Top) Id, IdRobot, IdTipoMantenimiento, Fecha, Descripcion, DuracionHoras, CostoEstimado, IdUsuarioResponsable FROM mantenimiento_robot WHERE IdRobot=@IdRobot";
+			var sql = "SELECT TOP (@Top) Id, IdRobot, IdTipoMantenimiento, Fecha, Descripcion, DuracionHoras, CostoEstimado, IdUsuarioResponsable, Cerrado FROM mantenimiento_robot WHERE IdRobot=@IdRobot";
 			if (from.HasValue) sql += " AND Fecha >= @From";
 			if (to.HasValue) sql += " AND Fecha <= @To";
 			sql += " ORDER BY Fecha DESC";
@@ -368,7 +393,211 @@ namespace DAL
 							Descripcion = rd.IsDBNull(4) ? null : rd.GetString(4),
 							DuracionHoras = rd.IsDBNull(5) ? (decimal?)null : rd.GetDecimal(5),
 							CostoEstimado = rd.IsDBNull(6) ? (decimal?)null : rd.GetDecimal(6),
-							IdUsuarioResponsable = rd.IsDBNull(7) ?0 : rd.GetInt32(7)
+							IdUsuarioResponsable = rd.IsDBNull(7) ?0 : rd.GetInt32(7),
+							Cerrado = !rd.IsDBNull(8) && rd.GetBoolean(8)
+						});
+					}
+				}
+			}
+			return list;
+		}
+		#endregion
+
+		#region UpdateTaskData
+		public void UpdateTaskData(int tareaId, DateTime? fechaProgramada, string parametrosJSON, string observaciones, DateTime? fechaInicio = null, DateTime? fechaFin = null)
+		{
+			var setList = new List<string>();
+			if (fechaProgramada.HasValue) setList.Add(" FechaProgramada=@FechaProgramada");
+			if (parametrosJSON != null) setList.Add(" ParametrosJSON=@ParametrosJSON");
+			if (observaciones != null) setList.Add(" Observaciones=@Observaciones");
+			if (fechaInicio.HasValue) setList.Add(" FechaInicio=@FechaInicio");
+			if (fechaFin.HasValue) setList.Add(" FechaFin=@FechaFin");
+			if (setList.Count ==0) return;
+			var sql = "UPDATE tarea_robot SET" + string.Join(",", setList) + " WHERE Id=@Id";
+			using (var cn = new SqlConnection(DataBaseServices.getConnectionString()))
+			using (var cmd = new SqlCommand(sql, cn))
+			{
+				cmd.Parameters.AddWithValue("@Id", tareaId);
+				if (fechaProgramada.HasValue) cmd.Parameters.AddWithValue("@FechaProgramada", fechaProgramada.Value);
+				if (parametrosJSON != null) cmd.Parameters.AddWithValue("@ParametrosJSON", (object)parametrosJSON ?? DBNull.Value);
+				if (observaciones != null) cmd.Parameters.AddWithValue("@Observaciones", (object)observaciones ?? DBNull.Value);
+				if (fechaInicio.HasValue) cmd.Parameters.AddWithValue("@FechaInicio", fechaInicio.Value);
+				if (fechaFin.HasValue) cmd.Parameters.AddWithValue("@FechaFin", fechaFin.Value);
+				cn.Open();
+				cmd.ExecuteNonQuery();
+			}
+		}
+		#endregion
+		
+		#region Estados Tarea
+		/// <summary>
+		/// Obtiene todos los estados de tarea (tabla estado_tarea_robot) como diccionario Id->Nombre.
+		/// </summary>
+		public Dictionary<int,string> GetEstadosTarea()
+		{
+			var dict = new Dictionary<int,string>();
+			using (var cn = new SqlConnection(CONNECTION_STRING))
+			using (var cmd = new SqlCommand("SELECT Id, Nombre FROM estado_tarea_robot", cn))
+			{
+				cn.Open();
+				using (var rd = cmd.ExecuteReader())
+				{
+					while (rd.Read())
+					{
+						int id = rd.GetInt32(0);
+						string nombre = rd.IsDBNull(1) ? null : rd.GetString(1);
+						if (!dict.ContainsKey(id)) dict.Add(id, nombre);
+					}
+				}
+			}
+			return dict;
+		}
+		#endregion
+
+		#region Tareas Programadas
+		public List<TareaRobot> GetTasksToAutoStart(int scheduledStateId, DateTime nowUtc, int top =100)
+		{
+			var list = new List<TareaRobot>();
+			const string sql = @"SELECT TOP (@Top) Id, IdRobot, IdTipoTarea, IdEstadoTarea, FechaProgramada, FechaInicio, FechaFin, ParametrosJSON, Observaciones
+				FROM tarea_robot
+				WHERE IdEstadoTarea = @Estado AND FechaProgramada IS NOT NULL AND FechaProgramada <= @Now AND (FechaInicio IS NULL) 
+				ORDER BY FechaProgramada ASC";
+			using (var cn = new SqlConnection(DataBaseServices.getConnectionString()))
+			using (var cmd = new SqlCommand(sql, cn))
+			{
+				cmd.Parameters.AddWithValue("@Top", top);
+				cmd.Parameters.AddWithValue("@Estado", scheduledStateId);
+				cmd.Parameters.AddWithValue("@Now", nowUtc);
+				cn.Open();
+				using (var rd = cmd.ExecuteReader())
+				{
+					while (rd.Read())
+					{
+						list.Add(new TareaRobot
+						{
+							Id = rd.GetInt32(0),
+							IdRobot = rd.GetInt32(1),
+							IdTipoTarea = rd.GetInt32(2),
+							IdEstadoTarea = rd.GetInt32(3),
+							FechaProgramada = rd.IsDBNull(4) ? (DateTime?)null : rd.GetDateTime(4),
+							FechaInicio = rd.IsDBNull(5) ? (DateTime?)null : rd.GetDateTime(5),
+							FechaFin = rd.IsDBNull(6) ? (DateTime?)null : rd.GetDateTime(6),
+							ParametrosJSON = rd.IsDBNull(7) ? null : rd.GetString(7),
+							Observaciones = rd.IsDBNull(8) ? null : rd.GetString(8)
+						});
+					}
+				}
+			}
+			return list;
+		}
+
+		public List<TareaRobot> GetTasksToAutoFinish(int inProgressStateId, DateTime nowUtc, int top =100)
+		{
+			var list = new List<TareaRobot>();
+			const string sql = @"SELECT TOP (@Top) Id, IdRobot, IdTipoTarea, IdEstadoTarea, FechaProgramada, FechaInicio, FechaFin, ParametrosJSON, Observaciones
+				FROM tarea_robot
+				WHERE IdEstadoTarea = @Estado AND FechaFin IS NOT NULL AND FechaFin <= @Now AND (FechaInicio IS NOT NULL)
+				ORDER BY FechaFin ASC";
+			using (var cn = new SqlConnection(DataBaseServices.getConnectionString()))
+			using (var cmd = new SqlCommand(sql, cn))
+			{
+				cmd.Parameters.AddWithValue("@Top", top);
+				cmd.Parameters.AddWithValue("@Estado", inProgressStateId);
+				cmd.Parameters.AddWithValue("@Now", nowUtc);
+				cn.Open();
+				using (var rd = cmd.ExecuteReader())
+				{
+					while (rd.Read())
+					{
+						list.Add(new TareaRobot
+						{
+							Id = rd.GetInt32(0),
+							IdRobot = rd.GetInt32(1),
+							IdTipoTarea = rd.GetInt32(2),
+							IdEstadoTarea = rd.GetInt32(3),
+							FechaProgramada = rd.IsDBNull(4) ? (DateTime?)null : rd.GetDateTime(4),
+							FechaInicio = rd.IsDBNull(5) ? (DateTime?)null : rd.GetDateTime(5),
+							FechaFin = rd.IsDBNull(6) ? (DateTime?)null : rd.GetDateTime(6),
+							ParametrosJSON = rd.IsDBNull(7) ? null : rd.GetString(7),
+							Observaciones = rd.IsDBNull(8) ? null : rd.GetString(8)
+						});
+					}
+				}
+			}
+			return list;
+		}
+		#endregion
+
+		#region Task By Id
+		public TareaRobot GetTaskById(int tareaId)
+		{
+			using (var cn = new SqlConnection(DataBaseServices.getConnectionString()))
+			using (var cmd = new SqlCommand("SELECT Id, IdRobot, IdTipoTarea, IdEstadoTarea, FechaProgramada, FechaInicio, FechaFin, ParametrosJSON, Observaciones FROM tarea_robot WHERE Id=@Id", cn))
+			{
+				cmd.Parameters.AddWithValue("@Id", tareaId);
+				cn.Open();
+				using (var rd = cmd.ExecuteReader())
+				{
+					if (rd.Read())
+					{
+						return new TareaRobot
+						{
+							Id = rd.GetInt32(0),
+							IdRobot = rd.GetInt32(1),
+							IdTipoTarea = rd.GetInt32(2),
+							IdEstadoTarea = rd.GetInt32(3),
+							FechaProgramada = rd.IsDBNull(4) ? (DateTime?)null : rd.GetDateTime(4),
+							FechaInicio = rd.IsDBNull(5) ? (DateTime?)null : rd.GetDateTime(5),
+							FechaFin = rd.IsDBNull(6) ? (DateTime?)null : rd.GetDateTime(6),
+							ParametrosJSON = rd.IsDBNull(7) ? null : rd.GetString(7),
+							Observaciones = rd.IsDBNull(8) ? null : rd.GetString(8)
+						};
+					}
+				}
+			}
+			return null;
+		}
+		#endregion
+
+		#region Ultima Conexion
+		public void UpdateRobotUltimaConexion(int robotId, DateTime fecha)
+		{
+			using (var cn = new SqlConnection(CONNECTION_STRING))
+			using (var cmd = new SqlCommand("UPDATE robot SET UltimaConexion=@Fecha WHERE Id=@Id", cn))
+			{
+				cmd.Parameters.AddWithValue("@Id", robotId);
+				cmd.Parameters.AddWithValue("@Fecha", fecha);
+				cn.Open();
+				cmd.ExecuteNonQuery();
+			}
+		}
+		#endregion
+
+		#region Robots por Usuario
+		public List<Robot> GetRobotsByUser(int userId)
+		{
+			var list = new List<Robot>();
+			using (var cn = new SqlConnection(CONNECTION_STRING))
+			using (var cmd = new SqlCommand("SELECT Id, Nombre, NumeroSerie, Bateria, IdEstadoRobot, FechaAlta, UltimaConexion, Latitud, Longitud, IdUsuarioResponsable FROM robot WHERE IdUsuarioResponsable=@uid", cn))
+			{
+				cmd.Parameters.AddWithValue("@uid", userId);
+				cn.Open();
+				using (var rd = cmd.ExecuteReader())
+				{
+					while (rd.Read())
+					{
+						list.Add(new Robot
+						{
+							Id = rd.GetInt32(0),
+							Nombre = rd.IsDBNull(1) ? null : rd.GetString(1),
+							NumeroSerie = rd.IsDBNull(2) ? null : rd.GetString(2),
+							Bateria = rd.IsDBNull(3) ?0 : rd.GetInt32(3),
+							IdEstadoRobot = rd.IsDBNull(4) ?0 : rd.GetInt32(4),
+							FechaAlta = rd.IsDBNull(5) ? (DateTime?)null : rd.GetDateTime(5),
+							UltimaConexion = rd.IsDBNull(6) ? (DateTime?)null : rd.GetDateTime(6),
+							Latitud = rd.IsDBNull(7) ? (decimal?)null : rd.GetDecimal(7),
+							Longitud = rd.IsDBNull(8) ? (decimal?)null : rd.GetDecimal(8),
+							IdUsuarioResponsable = rd.IsDBNull(9) ?0 : rd.GetInt32(9)
 						});
 					}
 				}

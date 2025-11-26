@@ -11,7 +11,6 @@
 	service.Susbcribe(translator);
 	if (Services.SessionManager.IsLogged()) { service.ChangeLanguage((Services.SessionManager.GetInstance.User.LanguageId).ToString()); }
 	else { if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); } }
-	// Estados provistos por la BLL vía el controlador
 	var estados = (Dictionary<int,string>) (ViewBag.EstadosRobot ?? new Dictionary<int,string>());
 }
 <head>
@@ -27,10 +26,11 @@
 		.layout { display:flex; min-height:calc(100vh -60px); }
 		.sidebar { width:240px; background:#e8f5e9; border-right:1px solid #a5d6a7; padding:16px; position:sticky; top:0; height:100vh; }
 		.sidebar a { display:block; color:#1b5e20; text-decoration:none; padding:8px 10px; border-radius:6px; margin-bottom:6px; font-weight:600; }
-		.sidebar a:hover { background:#c8e6c9; }
+		.sidebar a:hover, .sidebar a.active { background:#c8e6c9; }
 		.content { flex:1; padding:32px 48px 40px; }
 		.robots-wrapper { max-width:1180px; margin:0 auto; }
-		.filter-bar { background:#ffffff; border:1px solid #d8e2d8; border-radius:14px; padding:12px 16px; margin:0 0 16px 0; display:flex; align-items:center; gap:12px; }
+		.filter-bar { display:flex; align-items:center; gap:12px; justify-content:space-between;  padding-bottom:10px; }
+		.filter-group { display:flex; align-items:center; gap:12px; }
 		.filter-bar label { font-weight:600; color:#1b5e20; }
 		.filter-bar select { padding:6px 10px; border:1px solid #cfe0cf; border-radius:8px; }
 		.robot-list { display:flex; flex-direction:column; gap:20px; }
@@ -62,6 +62,17 @@
 		.btn-config:hover { background:linear-gradient(135deg,#dfe4e6,#c5ced2); }
 		.empty-msg { background:#fff; border:1px dashed #cfe0cf; padding:48px 32px; border-radius:24px; font-weight:600; color:#1b5e20; text-align:center; }
 		footer { background:#2E7D32; color:#fff; padding:14px; text-align:center; }
+		/* Modal básico reutilizable */
+		.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;}
+		.modal{background:#fff;border-radius:12px;max-width:560px;width:92%;box-shadow:0 10px 30px rgba(0,0,0,.25);} 
+		.modal header{padding:14px 18px;border-bottom:1px solid #e5e5e5;font-weight:700;color:#2E7D32;}
+		.modal .body{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+		.modal .actions{padding:12px 18px;border-top:1px solid #e5e5e5;display:flex;gap:10px;justify-content:flex-end;}
+		.fld{display:flex;flex-direction:column;gap:6px;}
+		.fld label{font-size:13px;font-weight:700;color:#1b5e20;}
+		.fld input,.fld select{border:1px solid #cfe0cf;border-radius:8px;padding:8px 10px;font-size:13px;}
+		.btn-secondary{background:#eceff1;color:#2b2b2b;}
+		.btn-secondary:hover{background:#dfe3e6;}
 		@@media (max-width:768px){ .content { padding:28px 20px; } .robot-item { flex-direction:column; align-items:flex-start; } .robot-actions { width:100%; justify-content:flex-start; flex-wrap:wrap; } .robot-actions .btn { flex:1; } }
 	</style>
 </head>
@@ -100,14 +111,17 @@
 				<div class="empty-msg">@translator.GetTraduction(service,"NoRobots")</div>
 			} else {
 				<div class="filter-bar">
-					<label for="estadoFilter">@translator.GetTraduction(service,"FilterByState"):</label>
-					<select id="estadoFilter">
-						<option value="all">@translator.GetTraduction(service,"All")</option>
-						@foreach (var kv in estados)
-						{
-							<option value="@kv.Key">@translator.GetTraduction(service, kv.Value)</option>
-						}
-					</select>
+					<div class="filter-group">
+						<label for="estadoFilter">@translator.GetTraduction(service,"FilterByState"):</label>
+						<select id="estadoFilter">
+							<option value="all">@translator.GetTraduction(service,"All")</option>
+							@foreach (var kv in estados)
+							{
+								<option value="@kv.Key">@translator.GetTraduction(service, kv.Value)</option>
+							}
+						</select>
+					</div>
+					<button type="button" class="btn" onclick="openRobotCreateModal()">@translator.GetTraduction(service,"CreateRobot")</button>
 				</div>
 				<div class="robot-list">
 					@foreach (var r in Model) {
@@ -115,16 +129,16 @@
 						string estadoNombreRaw = estados.ContainsKey(r.IdEstadoRobot) ? estados[r.IdEstadoRobot] : r.IdEstadoRobot.ToString();
 						string estadoNombreTraducido = translator.GetTraduction(service, estadoNombreRaw);
 						string estadoClass = estadoNombreRaw.ToLower().Replace(" ","-");
-						bool activo = r.IdEstadoRobot ==2;
-						var botonPowerTexto = activo ? translator.GetTraduction(service,"Stop") : translator.GetTraduction(service,"Activate");
-						var siguienteEstadoPower = activo ?4 :2;
+						bool activo = r.IdEstadoRobot ==1; // ahora1=active
+						var botonPowerTexto = activo ? translator.GetTraduction(service,"Deactivate") : translator.GetTraduction(service,"Activate");
+						var siguienteEstadoPower = activo ?3 :1; // toggle1<->3
 						<div class="robot-item" data-id="@r.Id" data-state="@r.IdEstadoRobot">
 							<div class="robot-info">
 								<h3>@r.Nombre</h3>
 								<p><strong>@translator.GetTraduction(service, "State"):</strong> <span class="status-pill status-@estadoClass">@estadoNombreTraducido</span></p>
 								<p><strong>@translator.GetTraduction(service, "Battery"):</strong></p>
 								<div class="battery-wrap @(bateriaPct<=15?"battery-low":"")">
-									<div class="battery-bar"><div class="battery-fill" style="width:@bateriaPct;"></div></div>
+									<div class="battery-bar"><div class="battery-fill" style="width:@bateriaPct%;"></div></div>
 									<span class="battery-label">@bateriaPct%</span>
 								</div>
 							</div>
@@ -139,6 +153,44 @@
 			</div>
 		</main>
 	</div>
+	<!-- Modal crear robot -->
+	<div id="robotCreateModal" class="modal-backdrop">
+		<div class="modal" role="dialog" aria-modal="true">
+			<header>@translator.GetTraduction(service,"CreateRobot")</header>
+			<div class="body">
+				<div class="fld">
+					<label for="cr-nombre">@translator.GetTraduction(service,"Name")</label>
+					<input id="cr-nombre" type="text" />
+				</div>
+				<div class="fld">
+					<label for="cr-numero">@translator.GetTraduction(service,"SerialNumber")</label>
+					<input id="cr-numero" type="text" />
+				</div>
+				<div class="fld">
+					<label for="cr-bateria">@translator.GetTraduction(service,"Battery") (%)</label>
+					<input id="cr-bateria" type="number" min="0" max="100" value="100" />
+				</div>
+				<div class="fld">
+					<label for="cr-estado">@translator.GetTraduction(service,"State")</label>
+					<select id="cr-estado">
+						@foreach (var kv in estados){<option value="@kv.Key">@translator.GetTraduction(service, kv.Value)</option>}
+					</select>
+				</div>
+				<div class="fld">
+					<label for="cr-lat">@translator.GetTraduction(service,"Latitude")</label>
+					<input id="cr-lat" type="text" />
+				</div>
+				<div class="fld">
+					<label for="cr-lon">@translator.GetTraduction(service,"Longitude")</label>
+					<input id="cr-lon" type="text" />
+				</div>
+			</div>
+			<div class="actions">
+				<button class="btn btn-secondary" type="button" onclick="closeRobotCreateModal()">@translator.GetTraduction(service,"Cancel")</button>
+				<button class="btn" type="button" onclick="saveRobotCreate()">@translator.GetTraduction(service,"Save")</button>
+			</div>
+		</div>
+	</div>
 	<footer>©2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.</footer>
 	<script src="~/Scripts/scriptIdioma.js"></script>
 	<script>
@@ -148,7 +200,22 @@
 		document.querySelectorAll('.btn-power').forEach(b=>b.addEventListener('click',function(){var id=this.getAttribute('data-id');var next=this.getAttribute('data-next');post('/Robot/ChangeState',{id:parseInt(id),newState:parseInt(next)}).then(resp=>{if(resp.success){location.reload();}else{alert(resp.error||'Error');}}).catch(()=>alert('Error de conexión'));}));
 		var sel=document.getElementById('estadoFilter');
 		if(sel){ sel.addEventListener('change', function(){ var v=this.value; var items=document.querySelectorAll('.robot-item'); items.forEach(function(it){ var st=it.getAttribute('data-state'); if(v==='all' || v===st){ it.style.display='flex'; } else { it.style.display='none'; } }); }); }
+		window.openRobotCreateModal=function(){ document.getElementById('robotCreateModal').style.display='flex'; };
+		window.closeRobotCreateModal=function(){ document.getElementById('robotCreateModal').style.display='none'; };
+		window.saveRobotCreate=function(){
+			var nombre=document.getElementById('cr-nombre').value.trim();
+			var numero=document.getElementById('cr-numero').value.trim();
+			var bateria=parseInt(document.getElementById('cr-bateria').value);
+			var estado=parseInt(document.getElementById('cr-estado').value);
+			var latStr=document.getElementById('cr-lat').value.trim();
+			var lonStr=document.getElementById('cr-lon').value.trim();
+			if(!nombre||!numero){ alert('Nombre y Número de serie requeridos'); return; }
+			if(isNaN(bateria)||bateria<0||bateria>100){ alert('Batería inválida'); return; }
+			var lat = latStr? parseFloat(latStr): null;
+			var lon = lonStr? parseFloat(lonStr): null;
+			var body={ Nombre:nombre, NumeroSerie:numero, Bateria:bateria, IdEstadoRobot:estado, Latitud:lat, Longitud:lon };
+			post('/Robot/Create', body).then(function(resp){ if(resp.success){ location.reload(); } else { alert(resp.error||'Error'); } });
+		};
 	})();
 	</script>
-</body>
-</html></html>
+</body></html></body></html>

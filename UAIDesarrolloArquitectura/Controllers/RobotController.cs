@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using BLL;
 using Services.Models;
-using Services;
 
 namespace UAIDesarrolloArquitectura.Controllers
 {
@@ -33,7 +31,7 @@ namespace UAIDesarrolloArquitectura.Controllers
 		{
 			var forbid = ForbidIfNoPermission(); if (forbid != null) return forbid;
 			// Obtiene robots y estados v?a BLL
-			var robots = _bll.GetAllRobots();
+			var robots = _bll.GetRobotsForCurrentUser();
 			var estados = _bll.GetEstadosRobot();
 			ViewBag.EstadosRobot = estados; // disponible en la vista
 			return View("Robots", robots);
@@ -44,9 +42,13 @@ namespace UAIDesarrolloArquitectura.Controllers
 		public ActionResult Details(int id)
 		{
 			var forbid = ForbidIfNoPermission(); if (forbid != null) return forbid;
-			var robot = _bll.GetRobotById(id);
+			var robots = _bll.GetRobotsForCurrentUser();
+			if (robots.All(r => r.Id != id)) return new HttpStatusCodeResult(403, "Acceso denegado");
+			var robot = robots.FirstOrDefault(r => r.Id == id);
 			if (robot == null) return HttpNotFound();
 			ViewBag.EstadosRobot = _bll.GetEstadosRobot();
+			ViewBag.RobotTasks = _bll.ObtenerTareas(id, null,200); // lista de tareas para la vista detalle
+			ViewBag.EstadosTarea = _bll.ObtenerEstadosTarea();
 			return View("RobotDetalle", robot);
 		}
 
@@ -226,6 +228,41 @@ namespace UAIDesarrolloArquitectura.Controllers
 			catch (Exception ex)
 			{
 				return Json(new { success = false, error = ex.Message });
+			}
+		}
+
+		// POST: /Robot/UpdateTaskData
+		[HttpPost]
+		public ActionResult UpdateTaskData(int id, DateTime? fechaProgramada, string parametrosJSON, string observaciones, DateTime? fechaInicio = null, DateTime? fechaFin = null)
+		{
+			try
+			{
+				var forbid = ForbidIfNoPermission(); if (forbid != null) return forbid;
+				int userId = Services.SessionManager.IsLogged() ? Services.SessionManager.GetInstance.User.id :0;
+				var tarea = new TareaRobot { Id = id, FechaProgramada = fechaProgramada, ParametrosJSON = parametrosJSON, Observaciones = observaciones, FechaInicio = fechaInicio, FechaFin = fechaFin };
+				_bll.ActualizarTareaDatos(tarea, userId);
+				return Json(new { success = true });
+			}
+			catch (System.Exception ex)
+			{
+				return Json(new { success = false, error = ex.Message });
+			}
+		}
+
+		// GET: /Robot/GetTaskStates
+		[HttpGet]
+		public ActionResult GetTaskStates(int robotId)
+		{
+			try
+			{
+				var tareas = _bll.ObtenerTareas(robotId, null,200);
+				var estados = _bll.ObtenerEstadosTarea();
+				var data = tareas.Select(t => new { id = t.Id, estadoId = t.IdEstadoTarea, estadoNombre = estados.ContainsKey(t.IdEstadoTarea)? estados[t.IdEstadoTarea] : t.IdEstadoTarea.ToString() }).ToList();
+				return Json(new { success = true, data }, JsonRequestBehavior.AllowGet);
+			}
+			catch (Exception ex)
+			{
+				return Json(new { success = false, error = ex.Message }, JsonRequestBehavior.AllowGet);
 			}
 		}
 	}

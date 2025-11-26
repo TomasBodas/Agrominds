@@ -7,7 +7,7 @@ using Services;
 namespace BLL
 {
 	/// <summary>
-	/// Capa de negocio para Robots: validaciones, reglas, orquestaci?n y servicios de alto nivel.
+	/// Capa de negocio para Robots y Tareas.
 	/// </summary>
 	public class BLL_Robot
 	{
@@ -15,22 +15,29 @@ namespace BLL
 		private readonly DAL_User _dalUser = new DAL_User();
 		private readonly BLL_CheckDigitsManager _dvManager = new BLL_CheckDigitsManager();
 
-		// Estados permitidos en transici?n (ejemplo simple) -> ajustar seg?n cat?logo real
+		// Estados de tarea definidos por el usuario
+		public const int EstadoTarea_Pending =1;
+		public const int EstadoTarea_InProgress =2;
+		public const int EstadoTarea_Finished =3;
+		public const int EstadoTarea_Cancelled =4;
+
+		// Actualizado:1=Activo,3=Inactivo. Permitimos toggle directo1<->3 más otros existentes.
 		private static readonly Dictionary<int, int[]> _allowedTransitions = new Dictionary<int, int[]>()
 		{
-			// estadoActual => estadosDestinoPermitidos
-			{1, new[]{2,3}}, // Ej:1=Disponible ->2=EnTarea,3=EnMantenimiento
-			{2, new[]{1,4}}, //2=EnTarea ->1=Disponible,4=Error
-			{3, new[]{1}}, //3=EnMantenimiento ->1=Disponible
-			{4, new[]{1}} //4=Error ->1=Disponible
+			{1, new[]{3,2}},
+			{3, new[]{1}},
+			{2, new[]{1,4}},
+			{4, new[]{1}}
 		};
 
 		public int CrearRobot(Robot robot, int usuarioId =0)
 		{
 			ValidarRobot(robot);
 			robot.FechaAlta = robot.FechaAlta ?? DateTime.UtcNow;
+			// Setear el usuario responsable al creador
+			robot.IdUsuarioResponsable = usuarioId;
 			int id = _dal.CreateRobot(robot);
-			RegistrarLog(usuarioId, "Robot", $"Se cre? robot #{id} ({robot.Nombre})");
+			RegistrarLog(usuarioId, "Robot", $"Se creó robot #{id} ({robot.Nombre})");
 			RecalcularDigitosVerificadores();
 			return id;
 		}
@@ -39,14 +46,14 @@ namespace BLL
 		{
 			ValidarRobot(robot, true);
 			_dal.UpdateRobot(robot);
-			RegistrarLog(usuarioId, "Robot", $"Se actualiz? robot #{robot.Id}");
+			RegistrarLog(usuarioId, "Robot", $"Se actualizó robot #{robot.Id}");
 			RecalcularDigitosVerificadores();
 		}
 
 		public void EliminarRobot(int robotId, int usuarioId =0)
 		{
 			_dal.DeleteRobot(robotId);
-			RegistrarLog(usuarioId, "Robot", $"Se elimin? robot #{robotId}");
+			RegistrarLog(usuarioId, "Robot", $"Se eliminó robot #{robotId}");
 			RecalcularDigitosVerificadores();
 		}
 
@@ -64,7 +71,12 @@ namespace BLL
 			if (Array.IndexOf(_allowedTransitions[robot.IdEstadoRobot], nuevoEstado) <0)
 				throw new InvalidOperationException("Transición de estado no permitida");
 			_dal.UpdateRobotEstado(robotId, nuevoEstado);
+			if (nuevoEstado ==3)
+			{
+				_dal.UpdateRobotUltimaConexion(robotId, DateTime.Now);
+			}
 			RegistrarLog(usuarioId, "Robot", $"Estado robot #{robotId} {robot.IdEstadoRobot} -> {nuevoEstado}");
+			RecalcularDigitosVerificadores();
 		}
 
 		public int ProgramarTarea(TareaRobot tarea, int usuarioId =0)
@@ -73,6 +85,7 @@ namespace BLL
 			DetectarSolapamientos(tarea);
 			int id = _dal.CreateTask(tarea);
 			RegistrarLog(usuarioId, "TareaRobot", $"Se programó tarea #{id} para robot #{tarea.IdRobot}");
+			RecalcularDigitosVerificadores();
 			return id;
 		}
 
@@ -80,10 +93,66 @@ namespace BLL
 		{
 			_dal.UpdateTaskStatus(tareaId, nuevoEstado, inicio, fin);
 			RegistrarLog(usuarioId, "TareaRobot", $"Actualizado estado tarea #{tareaId} a {nuevoEstado}");
+			RecalcularDigitosVerificadores();
+		}
+
+		// Auto-inicio: tareas en estado Pending cuya FechaProgramada llegó
+		public List<TareaRobot> ObtenerTareasParaAutoInicio(DateTime ahoraLocal, int top =100)
+			=> _dal.GetTasksToAutoStart(EstadoTarea_Pending, ahoraLocal, top);
+
+		public void IniciarTarea(int tareaId)
+			=> _dal.UpdateTaskStatus(tareaId, EstadoTarea_InProgress, DateTime.Now, null); // cambiado a hora local
+
+		// Auto-finalización: tareas InProgress cuya FechaFin (planificada) llegó
+		public List<TareaRobot> ObtenerTareasParaAutoFin(DateTime ahoraLocal, int top =100)
+			=> _dal.GetTasksToAutoFinish(EstadoTarea_InProgress, ahoraLocal, top);
+
+		public void FinalizarTarea(int tareaId)
+		{
+			_dal.UpdateTaskStatus(tareaId, EstadoTarea_Finished, null, DateTime.Now);
+			AgregarTelemetriaFinTarea(tareaId);
+		}
+
+		public bool FinalizarTareaAuto(int tareaId)
+		{
+			var tarea = _dal.GetTaskById(tareaId);
+			if (tarea == null) return false;
+			if (tarea.IdEstadoTarea != EstadoTarea_InProgress) return false;
+			_dal.UpdateTaskStatus(tareaId, EstadoTarea_Finished, null, DateTime.Now);
+			AgregarTelemetriaFinTarea(tareaId, tarea);
+			RegistrarLog(0, "TareaRobot", $"Auto fin tarea #{tareaId}");
+			RecalcularDigitosVerificadores();
+			return true;
+		}
+
+		private void AgregarTelemetriaFinTarea(int tareaId, TareaRobot tareaLoaded = null)
+		{
+			var tarea = tareaLoaded ?? _dal.GetTaskById(tareaId);
+			if (tarea == null) return;
+			var tele = new TelemetriaRobot
+			{
+				IdRobot = tarea.IdRobot,
+				FechaHora = DateTime.Now,
+				Estado = "TaskFinished",
+				DatosJSON = $"{{\"taskId\":{tareaId},\"finishedAt\":\"{DateTime.Now:yyyy-MM-dd HH:mm:ss}\"}}"
+			};
+			try { _dal.InsertTelemetry(tele); } catch { }
+		}
+
+		public Dictionary<int,string> ObtenerEstadosTarea() => _dal.GetEstadosTarea();
+
+		public void ActualizarTareaDatos(TareaRobot t, int usuarioId =0)
+		{
+			if (t == null) throw new ArgumentNullException("t");
+			if (t.Id <=0) throw new ArgumentException("Id de tarea inválido");
+			_dal.UpdateTaskData(t.Id, t.FechaProgramada, t.ParametrosJSON, t.Observaciones, t.FechaInicio, t.FechaFin);
+			RegistrarLog(usuarioId, "TareaRobot", $"Actualizados datos tarea #{t.Id}");
+			RecalcularDigitosVerificadores();
 		}
 
 		public void RegistrarTelemetria(TelemetriaRobot telemetria, bool actualizarBateria = true, int usuarioId =0)
 		{
+			if (telemetria == null) throw new ArgumentNullException(nameof(telemetria));
 			if (telemetria.FechaHora == default) telemetria.FechaHora = DateTime.UtcNow;
 			_dal.InsertTelemetry(telemetria);
 			if (actualizarBateria && telemetria.NivelBateria.HasValue)
@@ -110,6 +179,7 @@ namespace BLL
 			ValidarMantenimiento(m);
 			int id = _dal.CreateMaintenance(m);
 			RegistrarLog(usuarioId, "MantenimientoRobot", $"Mantenimiento #{id} creado para robot #{m.IdRobot}");
+			RecalcularDigitosVerificadores();
 			return id;
 		}
 
@@ -117,11 +187,12 @@ namespace BLL
 		{
 			_dal.CloseMaintenance(mantenimientoId, duracionHoras, costoEstimado, observaciones);
 			RegistrarLog(usuarioId, "MantenimientoRobot", $"Mantenimiento #{mantenimientoId} cerrado");
+			RecalcularDigitosVerificadores();
 		}
 
 		public List<Robot> GetAllRobots() => _dal.GetAllRobots();
 		public Robot GetRobotById(int id) => _dal.GetRobotById(id);
-		public Dictionary<int,string> GetEstadosRobot() => _dal.GetEstadosRobot();
+		public Dictionary<int, string> GetEstadosRobot() => _dal.GetEstadosRobot();
 
 		#region Validaciones
 		private void ValidarRobot(Robot r, bool update = false)
@@ -155,7 +226,7 @@ namespace BLL
 
 		private void DetectarSolapamientos(TareaRobot nueva)
 		{
-			if (!nueva.FechaProgramada.HasValue || !nueva.FechaFin.HasValue) return; // se ignora si faltan fechas
+			if (!nueva.FechaProgramada.HasValue || !nueva.FechaFin.HasValue) return;
 			var existentes = _dal.GetTasks(nueva.IdRobot, null,500);
 			foreach (var t in existentes)
 			{
@@ -177,5 +248,25 @@ namespace BLL
 			try { _dvManager.SetCheckDigits(); } catch { }
 		}
 		#endregion
+
+		public bool IniciarTareaSiRobotActivo(int tareaId)
+		{
+			var tarea = _dal.GetTaskById(tareaId);
+			if (tarea == null) return false;
+			if (tarea.IdEstadoTarea != EstadoTarea_Pending) return false;
+			var robot = _dal.GetRobotById(tarea.IdRobot);
+			if (robot == null || robot.IdEstadoRobot !=1) return false; // robot inactivo
+			_dal.UpdateTaskStatus(tareaId, EstadoTarea_InProgress, DateTime.Now, null); // hora local
+			RegistrarLog(0, "TareaRobot", $"Auto inicio tarea #{tareaId}");
+			RecalcularDigitosVerificadores();
+			return true;
+		}
+
+		public List<Robot> GetRobotsForCurrentUser()
+		{
+			if (!SessionManager.IsLogged()) return new List<Robot>();
+			var uid = SessionManager.GetInstance.User.id;
+			return _dal.GetRobotsByUser(uid);
+		}
 	}
 }

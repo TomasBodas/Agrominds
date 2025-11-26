@@ -16,6 +16,15 @@ namespace UAIDesarrolloArquitectura.Controllers
     {
         private readonly BLL_Robot _bllRobot = new BLL_Robot(); // BLL para robots y estados
 
+        private ActionResult RequireLogin()
+        {
+            if (!SessionManager.IsLogged())
+            {
+                return RedirectToAction("Login", "Login");
+            }
+            return null;
+        }
+
         public ActionResult Startup()
         {
             return View("Index");
@@ -30,8 +39,9 @@ namespace UAIDesarrolloArquitectura.Controllers
         [HttpGet]
         public ActionResult Robots()
         {
+            var guard = RequireLogin(); if (guard != null) return guard;
             // Obtener robots y estados vía BLL (ya no directamente desde DAL)
-            IList<Robot> robots = _bllRobot.GetAllRobots();
+            IList<Robot> robots = _bllRobot.GetRobotsForCurrentUser();
             ViewBag.EstadosRobot = _bllRobot.GetEstadosRobot();
             return View("Robots", robots);
         }
@@ -78,11 +88,13 @@ namespace UAIDesarrolloArquitectura.Controllers
 
         public ActionResult Logout()
         {
-            
             DAL_User dalUser = new DAL_User();
-            dalUser.EventLog(SessionManager.GetInstance.User.id, DateTime.Now.ToString(), "Cierre de sesión", "Se cerró sesión");
-            BLL_CheckDigitsManager bll_dvmanager = new BLL_CheckDigitsManager();
-            bll_dvmanager.SetCheckDigits();
+            if (SessionManager.IsLogged())
+            {
+                dalUser.EventLog(SessionManager.GetInstance.User.id, DateTime.Now.ToString(), "Cierre de sesión", "Se cerró sesión");
+                BLL_CheckDigitsManager bll_dvmanager = new BLL_CheckDigitsManager();
+                bll_dvmanager.SetCheckDigits();
+            }
             SessionManager.logout();
             return View("Index");
         }
@@ -91,6 +103,7 @@ namespace UAIDesarrolloArquitectura.Controllers
         [HttpGet]
         public ActionResult Mantenimientos()
         {
+            var guard = RequireLogin(); if (guard != null) return guard;
             var dalRobot = new DAL_Robot();
             var dalList = dalRobot.GetAllRobots();
             var mantenimientosPorRobot = new Dictionary<int, IList<MantenimientoRobot>>();
@@ -107,6 +120,7 @@ namespace UAIDesarrolloArquitectura.Controllers
         [HttpGet]
         public ActionResult Telemetria()
         {
+            var guard = RequireLogin(); if (guard != null) return guard;
             var dalRobot = new DAL_Robot();
             var robots = dalRobot.GetAllRobots();
             var telemetriaPorRobot = new Dictionary<int, IList<TelemetriaRobot>>();
@@ -123,6 +137,7 @@ namespace UAIDesarrolloArquitectura.Controllers
         [HttpGet]
         public ActionResult ContactUs()
         {
+            var guard = RequireLogin(); if (guard != null) return guard;
             return View("ContactUs");
         }
     }

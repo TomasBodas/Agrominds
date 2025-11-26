@@ -9,11 +9,17 @@
  lC.InitializeController();
  Services.LanguageService service = lC.GetService();
  service.Susbcribe(translator);
- if (Services.SessionManager.IsLogged()) { service.ChangeLanguage((Services.SessionManager.GetInstance.User.LanguageId).ToString()); }
- else { if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); } }
- var estados = new Dictionary<int,string>{{1,"Disponible"},{2,"Activo"},{3,"Mantenimiento"},{4,"Apagado"}};
- string estado = estados.ContainsKey(Model.IdEstadoRobot)? estados[Model.IdEstadoRobot]: Model.IdEstadoRobot.ToString();
+ if (Services.SessionManager.IsLogged()) { service.ChangeLanguage((Services.SessionManager.GetInstance.User.LanguageId).ToString()); } else { if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); } }
+ var estados = (System.Collections.Generic.Dictionary<int,string>)(ViewBag.EstadosRobot ?? new System.Collections.Generic.Dictionary<int,string>());
+ var estadosTarea = (System.Collections.Generic.Dictionary<int,string>)(ViewBag.EstadosTarea ?? new System.Collections.Generic.Dictionary<int,string>());
+ string estadoRaw = estados.ContainsKey(Model.IdEstadoRobot)? estados[Model.IdEstadoRobot]: Model.IdEstadoRobot.ToString();
+ string estadoTraducido = translator.GetTraduction(service, estadoRaw);
  var bateriaPct = Model.Bateria <0 ?0 : (Model.Bateria >100 ?100 : Model.Bateria);
+ bool activo = Model.IdEstadoRobot ==1; //1 = activo
+ var botonPowerTexto = activo ? translator.GetTraduction(service, "Deactivate") : translator.GetTraduction(service, "Activate");
+ var siguienteEstadoPower = activo ?3 :1; // toggle1 <->3
+ var botonPowerClaseExtra = activo ? "btn-disconnect" : "btn-connect"; // estilos diferenciados
+ var tareas = ViewBag.RobotTasks as IList<TareaRobot> ?? new List<TareaRobot>();
 }
 <head>
  <meta charset="UTF-8" />
@@ -24,27 +30,60 @@
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
  <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
  <style>
+ /* estilos existentes */
  body { font-family:'Chivo', Arial, sans-serif; background:#f5faf5; }
  .layout { display:flex; min-height:calc(100vh -60px); }
  .sidebar { width:240px; background:#e8f5e9; border-right:1px solid #a5d6a7; padding:16px; position:sticky; top:0; height:100vh; }
- .sidebar a { display:flex; align-items:center; gap:8px; color:#1b5e20; text-decoration:none; padding:8px 10px; border-radius:6px; margin-bottom:6px; font-weight:600; }
- .sidebar a .ico { width:18px; height:18px; display:inline-flex; }
+ .sidebar a { display:block; color:#1b5e20; text-decoration:none; padding:8px 10px; border-radius:6px; margin-bottom:6px; font-weight:600; }
  .sidebar a:hover { background:#c8e6c9; }
  .content { flex:1; padding:32px 48px 40px; }
  .wrapper { max-width:980px; margin:0 auto; }
  .card { background:#fff; border:1px solid #d8e2d8; border-radius:20px; padding:24px 32px; }
- h2 { margin:0012px; font-size:26px; color:#2E7D32; }
+ h2 { margin:0 0 12px 0; font-size:26px; color:#2E7D32; }
  .meta p { margin:6px 0; font-size:15px; color:#1b5e20; }
  .pill { display:inline-block; padding:6px 12px; border-radius:16px; background:#e8f5e9; font-weight:600; font-size:13px; }
  .battery-wrap { margin-top:10px; display:flex; align-items:center; gap:12px; }
  .battery-bar { width:200px; height:14px; background:#ececec; border-radius:10px; overflow:hidden; }
- .battery-fill { height:100%; background:linear-gradient(90deg,#66bb6a,#43A047); width:@bateriaPct; }
+ .battery-fill { height:100%; background:linear-gradient(90deg,#66bb6a,#43A047); transition:width .4s ease; }
  .battery-low .battery-fill { background:linear-gradient(90deg,#ef5350,#c62828); }
  .actions { margin-top:22px; display:flex; gap:14px; }
  .btn { cursor:pointer; border:none; padding:10px 18px; border-radius:14px; font-weight:600; font-size:13px; background:#2E7D32; color:#fff; }
  .btn:hover { background:#1b5e20; }
- .back-link { display:inline-block; margin:0016px; font-size:13px; text-decoration:none; color:#2E7D32; font-weight:600; }
+ .back-link { display:inline-block; margin:0 0 16px 0; font-size:13px; text-decoration:none; color:#2E7D32; font-weight:600; }
  .back-link:hover { text-decoration:underline; }
+ /* Nuevo estilo para listado de tareas */
+ .tasks-section { margin-top:26px; }
+ .tasks-section h3 { font-size:20px; margin:0 0 12px 0; color:#1b5e20; font-weight:700; letter-spacing:.3px; }
+ .task-list { display:flex; flex-direction:column; gap:12px; }
+ .task-item { background:#ffffff; border:1px solid #d8e2d8; border-radius:14px; padding:14px 20px; display:flex; justify-content:space-between; align-items:flex-start; box-shadow:02px 6px rgba(46,125,50,0.10); transition:box-shadow .25s; }
+ .task-item:hover { box-shadow:04px 12px rgba(46,125,50,0.16); }
+ .task-meta { font-size:13px; color:#1b5e20; line-height:1.4; }
+ .task-status { display:inline-block; padding:4px 10px; font-size:11px; font-weight:700; border-radius:14px; background:#e8f5e9; color:#1b5e20; }
+ .task-actions { display:flex; gap:8px; }
+ .task-actions .btn-sm { padding:6px 12px; font-size:11px; border-radius:10px; background:#2E7D32; color:#fff; border:none; cursor:pointer; }
+ .task-actions .btn-sm:hover { background:#1b5e20; }
+ .empty-tasks { background:#fff; border:1px dashed #cfe0cf; padding:18px 20px; border-radius:14px; font-size:13px; font-weight:600; text-align:center; color:#1b5e20; }
+ .btn-disconnect { background:#d32f2f; }
+.btn-disconnect:hover { background:#b71c1c; }
+.btn-connect { background:#2E7D32; }
+.btn-connect:hover { background:#1b5e20; }
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;}
+.modal{background:#fff;border-radius:12px;max-width:560px;width:92%;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+.modal header{padding:14px 18px;border-bottom:1px solid #e5e5e5;font-weight:700;color:#2E7D32;}
+.modal .body{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+.modal .actions{padding:12px 18px;border-top:1px solid #e5e5e5;display:flex;gap:10px;justify-content:flex-end;}
+.fld{display:flex;flex-direction:column;gap:6px;}
+.fld label{font-size:13px;font-weight:700;color:#1b5e20;}
+.fld input,.fld textarea{border:1px solid #cfe0cf;border-radius:8px;padding:8px 10px;font-size:13px;}
+.btn-secondary{background:#eceff1;color:#2b2b2b;}
+.btn-secondary:hover{background:#dfe3e6;}
+textarea#task-params { font-family: Consolas, monospace; white-space: pre; }
+/* estilos adicionales para campo estado */
+.task-state-label{font-weight:700;}
+.task-status-live{font-size:11px;font-weight:700;padding:4px 10px;border-radius:14px;background:#e8f5e9;color:#1b5e20;display:inline-block;}
+.task-status-live.inprogress{background:#e3f2fd;color:#1565c0;}
+.task-status-live.finished{background:#fff8e1;color:#ff8f00;}
+.task-status-live.cancelled{background:#ffebee;color:#c62828;}
  </style>
 </head>
 <body>
@@ -80,40 +119,223 @@
  </nav>
  <div class="layout">
  <aside class="sidebar">
- <a href="@Url.Action("Robots","Home")" class="active"><span class="ico">@Html.Raw("<svg fill='#2E7D32' viewBox='002424'><path d='M72h10v4h3a2200122v4h-2V8h-3v4H7V8H4v4H2V8a220012-2h3V2zm22v2h6V4H9zm-49h14v9H5v-9zm42v5h2v-5H9zm60v5h2v-5h-2z'/></svg>")</span><span>@translator.GetTraduction(service,"RobotsManagement")</span></a>
- <a href="@Url.Action("Mantenimientos","Home")"><span class="ico">@Html.Raw("<svg fill='#2E7D32' viewBox='002424'><path d='M20.34.6318.73l-.4-1.7-3.6-.8L15.92.98l-2.782.7L9.124.64l-.9.43-.73.6.8.432.72-.6.73.64.8.53.9L1211.1l3.91.9.5-3.93.6-.8-.3-3.7zM1216a44010-804400080z'/></svg>")</span><span>@translator.GetTraduction(service,"Maintenance")</span></a>
- <a href="@Url.Action("Telemetria","Home")"><span class="ico">@Html.Raw("<svg fill='#2E7D32' viewBox='002424'><path d='M33h2v18H3V3zm160h2v18h-2V3zM93h2v13H9V3zm45h2v18h-2V8z'/></svg>")</span><span>@translator.GetTraduction(service,"Telemetry")</span></a>
- <a href="@Url.Action("ContactUs","Home")"><span class="ico">@Html.Raw("<svg fill='#2E7D32' viewBox='002424'><path d='M44h16v12H5.17L417.17V4zm22v8h12V6H6zm410h2a5.55.50015.55.5H9a5.55.50015.5-5.5z'/></svg>")</span><span>@translator.GetTraduction(service,"Contact")</span></a>
+ <a href="@Url.Action("Robots","Home")" class="active">@translator.GetTraduction(service,"RobotsManagement")</a>
+ <a href="@Url.Action("Mantenimientos","Home")">@translator.GetTraduction(service,"Maintenance")</a>
+ <a href="@Url.Action("Telemetria","Home")">@translator.GetTraduction(service,"Telemetry")</a>
+ <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service,"Contact")</a>
  </aside>
  <main class="content">
  <div class="wrapper">
- <a class="back-link" href="@Url.Action("Robots","Home")">← Volver</a>
+ <a class="back-link" href="@Url.Action("Robots","Home")">← @translator.GetTraduction(service,"Back")</a>
  <div class="card">
  <h2>@Model.Nombre</h2>
  <div class="meta">
  <p><strong>ID:</strong> @Model.Id</p>
- <p><strong>Número Serie:</strong> @Model.NumeroSerie</p>
- <p><strong>Estado:</strong> <span class="pill">@estado</span></p>
- <p><strong>Fecha Alta:</strong> @(Model.FechaAlta.HasValue? Model.FechaAlta.Value.ToString("yyyy-MM-dd") : "-")</p>
- <p><strong>Batería:</strong></p>
+ <p><strong>@translator.GetTraduction(service,"SerialNumber"):</strong> @Model.NumeroSerie</p>
+ <p><strong>@translator.GetTraduction(service,"State"):</strong> <span class="pill">@estadoTraducido</span></p>
+ <p><strong>@translator.GetTraduction(service,"CreatedDate"):</strong> @(Model.FechaAlta.HasValue? Model.FechaAlta.Value.ToString("yyyy-MM-dd") : "-")</p>
+ <p><strong>@translator.GetTraduction(service,"LastConnection"):</strong> @(Model.UltimaConexion.HasValue? Model.UltimaConexion.Value.ToString("yyyy-MM-dd HH:mm") : "-")</p>
+ <p><strong>@translator.GetTraduction(service,"Latitude"):</strong> @(Model.Latitud.HasValue? Model.Latitud.Value.ToString("0.######") : "-")</p>
+ <p><strong>@translator.GetTraduction(service,"Longitude"):</strong> @(Model.Longitud.HasValue? Model.Longitud.Value.ToString("0.######") : "-")</p>
+ <p><strong>@translator.GetTraduction(service,"Battery"):</strong></p>
  <div class="battery-wrap @(bateriaPct<=15?"battery-low":"")">
- <div class="battery-bar"><div class="battery-fill" style="width:@bateriaPct;"></div></div>
+ <div class="battery-bar"><div class="battery-fill" style="width:@bateriaPct%"></div></div>
  <span>@bateriaPct%</span>
  </div>
  </div>
  <div class="actions">
- <button class="btn" onclick="cambiarEstado(@Model.Id,2)">Activar</button>
- <button class="btn" onclick="cambiarEstado(@Model.Id,4)">Apagar</button>
- <button class="btn" onclick="editar(@Model.Id)">Editar</button>
+ <button class="btn @botonPowerClaseExtra" onclick="cambiarEstado(@Model.Id,@siguienteEstadoPower)">@botonPowerTexto</button>
+ <button class="btn" onclick="editar(@Model.Id)">@translator.GetTraduction(service,"Edit")</button>
+ <button class="btn" onclick="openTaskCreateModal()">@translator.GetTraduction(service,"AddTask")</button>
+ </div>
+ </div>
+ <div class="tasks-section">
+ <h3>@translator.GetTraduction(service,"Tasks")</h3>
+ @if (tareas.Count ==0) { <div class="empty-tasks">@translator.GetTraduction(service,"NoTasks")</div> } else {
+ <div class="task-list" id="task-list">
+ @foreach (var t in tareas) {
+ var fechaProg = t.FechaProgramada.HasValue ? t.FechaProgramada.Value.ToString("yyyy-MM-dd HH:mm") : "-";
+ var fechaProgInput = t.FechaProgramada.HasValue ? t.FechaProgramada.Value.ToString("yyyy-MM-dd'T'HH:mm") : "";
+ var fechaFin = t.FechaFin.HasValue ? t.FechaFin.Value.ToString("yyyy-MM-dd HH:mm") : "-";
+ var fechaFinInput = t.FechaFin.HasValue ? t.FechaFin.Value.ToString("yyyy-MM-dd'T'HH:mm") : "";
+ string estadoTareaRaw = estadosTarea.ContainsKey(t.IdEstadoTarea) ? estadosTarea[t.IdEstadoTarea] : t.IdEstadoTarea.ToString();
+ string estadoCss = t.IdEstadoTarea==2?"inprogress": (t.IdEstadoTarea==3?"finished": (t.IdEstadoTarea==4?"cancelled":""));
+ string estadoTareaTrad = translator.GetTraduction(service, estadoTareaRaw);
+ <div class="task-item"
+ data-id="@t.Id"
+ data-fecha-prog="@fechaProgInput"
+ data-fecha-fin="@fechaFinInput"
+ data-obs="@System.Web.HttpUtility.HtmlAttributeEncode(t.Observaciones ?? "")"
+ data-params="@System.Web.HttpUtility.HtmlAttributeEncode(t.ParametrosJSON ?? "")"
+ data-estadoid="@t.IdEstadoTarea">
+ <div class="task-meta">
+ <strong>ID:</strong> @t.Id<br />
+ <strong>@translator.GetTraduction(service,"State"):</strong> <span class="task-status-live @estadoCss" id="task-status-@t.Id">@estadoTareaTrad</span><br />
+ <strong>@translator.GetTraduction(service,"Scheduled"):</strong> @fechaProg<br />
+ <strong>@translator.GetTraduction(service,"End"):</strong> @fechaFin<br />
+ @if (!string.IsNullOrWhiteSpace(t.Observaciones)) {<span><strong>@translator.GetTraduction(service,"Observations"):</strong> @t.Observaciones</span>}<br />
+ @if (!string.IsNullOrWhiteSpace(t.ParametrosJSON)) {<span><strong>@translator.GetTraduction(service,"Parameters"):</strong> <small>@(t.ParametrosJSON.Length >80 ? t.ParametrosJSON.Substring(0,80)+"..." : t.ParametrosJSON)</small></span>}
+ </div>
+ <div class="task-actions">
+ <button class="btn-sm" onclick="verTarea(@t.Id)">@translator.GetTraduction(service,"Detail")</button>
+ </div>
+ </div>
+ }
+ </div>
+ }
  </div>
  </div>
  </div>
  </main>
  </div>
+ <!-- Modal editar tarea -->
+ <div id="taskModal" class="modal-backdrop">
+ 	<div class="modal" role="dialog" aria-modal="true">
+ 		<header>@translator.GetTraduction(service,"EditTask")</header>
+ 		<div class="body">
+ 			<input type="hidden" id="task-id" />
+ 			<div class="fld">
+ 				<label for="task-fecha">@translator.GetTraduction(service,"Scheduled")</label>
+ 				<input id="task-fecha" type="datetime-local" />
+ 			</div>
+ 			<div class="fld">
+ 				<label for="task-end">@translator.GetTraduction(service,"End")</label>
+ 				<input id="task-end" type="datetime-local" />
+ 			</div>
+ 			<div class="fld">
+ 				<label for="task-obs">@translator.GetTraduction(service,"Observations")</label>
+ 				<textarea id="task-obs" rows="3"></textarea>
+ 			</div>
+ 			<div class="fld">
+ 				<label for="task-params">@translator.GetTraduction(service,"ParametersJSON")</label>
+ 				<textarea id="task-params" rows="8"></textarea>
+ 			</div>
+ 		</div>
+ 		<div class="actions">
+ 			<button class="btn btn-secondary" type="button" onclick="closeTaskModal()">@translator.GetTraduction(service,"Cancel")</button>
+ 			<button class="btn" type="button" onclick="saveTaskModal()">@translator.GetTraduction(service,"Save")</button>
+ 		</div>
+ 	</div>
+ </div>
+ <!-- Modal alta tarea -->
+ <div id="taskCreateModal" class="modal-backdrop" style="display:none;">
+ 	<div class="modal" role="dialog" aria-modal="true">
+ 		<header>@translator.GetTraduction(service,"AddTask")</header>
+ 		<div class="body">
+ 			<input type="hidden" id="task-create-robotid" value="@Model.Id" />
+ 			<div class="fld">
+ 				<label for="task-create-fecha">@translator.GetTraduction(service,"Scheduled")</label>
+ 				<input id="task-create-fecha" type="datetime-local" />
+ 			</div>
+ 			<div class="fld">
+ 				<label for="task-create-end">@translator.GetTraduction(service,"End")</label>
+ 				<input id="task-create-end" type="datetime-local" />
+ 			</div>
+ 			<div class="fld">
+ 				<label for="task-create-type">@translator.GetTraduction(service,"TaskType")</label>
+ 				<input id="task-create-type" type="number" min="1" step="1" value="1" />
+ 			</div>
+ 			<div class="fld">
+ 				<label for="task-create-state">@translator.GetTraduction(service,"State")</label>
+ 				<select id="task-create-state">
+ 					<option value="1" selected>Pending</option>
+ 					<option value="2">InProgress</option>
+ 					<option value="3">Finished</option>
+ 					<option value="4">Cancelled</option>
+ 				</select>
+ 			</div>
+ 			<div class="fld">
+ 				<label for="task-create-obs">@translator.GetTraduction(service,"Observations")</label>
+ 				<textarea id="task-create-obs" rows="3"></textarea>
+ 			</div>
+ 			<div class="fld">
+ 				<label for="task-create-params">@translator.GetTraduction(service,"ParametersJSON")</label>
+ 				<textarea id="task-create-params" rows="8"></textarea>
+ 			</div>
+ 		</div>
+ 		<div class="actions">
+ 			<button class="btn btn-secondary" type="button" onclick="closeTaskCreateModal()">@translator.GetTraduction(service,"Cancel")</button>
+ 			<button class="btn" type="button" onclick="saveTaskCreate()">@translator.GetTraduction(service,"Save")</button>
+ 		</div>
+ 	</div>
+ </div>
  <footer>©2026 AgroMinds — Tecnología agrícola inteligente.</footer>
+ <script src="~/Scripts/scriptIdioma.js"></script>
  <script>
  function cambiarEstado(id,estado){ fetch('/Robot/ChangeState',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id:id, newState:estado }) }) .then(r=>r.json()).then(x=>{ if(x.success){ location.reload(); } else { alert(x.error||'Error'); } }); }
- function editar(id){ alert('Editar robot '+id); }
+ function editar(id){ openRobotModal(); }
+ function openRobotModal(){
+ 	var m=document.getElementById('robotEditModal');
+ 	m.style.display='flex';
+ }
+ function closeRobotModal(){ document.getElementById('robotEditModal').style.display='none'; }
+ function saveRobot(){
+ 	var id=parseInt(document.getElementById('robot-id').value);
+ 	var nombre=document.getElementById('robot-nombre').value.trim();
+ 	var numero=document.getElementById('robot-numero').value.trim();
+ 	var bateria=parseInt(document.getElementById('robot-bateria').value);
+ 	var latStr=document.getElementById('robot-lat').value.trim();
+ 	var lonStr=document.getElementById('robot-lon').value.trim();
+ 	var estado=parseInt(document.getElementById('robot-estado').value);
+ 	if(!nombre||!numero){ alert('Nombre y Número de serie requeridos'); return; }
+ 	if(isNaN(bateria)||bateria<0||bateria>100){ alert('Batería inválida'); return; }
+ 	var lat = latStr? parseFloat(latStr): null;
+ 	var lon = lonStr? parseFloat(lonStr): null;
+ 	var body={ Id:id, Nombre:nombre, NumeroSerie:numero, Bateria:bateria, IdEstadoRobot:estado, Latitud:lat, Longitud:lon };
+ 	fetch('/Robot/Update',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
+ 	.then(r=>r.json()).then(x=>{ if(x.success){ location.reload(); } else { alert(x.error||'Error'); } });
+ }
+ function openTaskModal(t){
+ 	var m=document.getElementById('taskModal');
+ 	document.getElementById('task-id').value=t.id;
+ 	document.getElementById('task-obs').value=t.obs||'';
+ 	document.getElementById('task-fecha').value=t.fechaProg||'';
+ 	document.getElementById('task-end').value=t.fechaFin||'';
+ 	var raw=t.params||'';
+ 	// Decodificar entidades HTML basicas
+ 	raw=raw.replace(/&quot;/g,'"');
+ 	// Normalizar escapes dobles de barra invertida
+ 	raw=raw.replace(/\\\\/g,'\\');
+ 	try{ if(raw.trim()){ raw=JSON.stringify(JSON.parse(raw),null,2);} }catch(e){ /* dejar raw */ }
+ 	document.getElementById('task-params').value=raw;
+ 	m.style.display='flex';
+ }
+ function verTarea(id){
+ 	var item=document.querySelector('.task-item[data-id="'+id+'"]');
+ 	if(!item){ alert('Tarea no encontrada'); return; }
+ 	openTaskModal({
+ 		id:id,
+ 		fechaProg:item.getAttribute('data-fecha-prog'),
+ 		fechaFin:item.getAttribute('data-fecha-fin'),
+ 		obs:item.getAttribute('data-obs'),
+ 		params:item.getAttribute('data-params')
+ 	});
+ }
+ function closeTaskModal(){ document.getElementById('taskModal').style.display='none'; }
+ function saveTaskModal(){
+ 	var id=document.getElementById('task-id').value;
+ 	var fp=document.getElementById('task-fecha').value;
+ 	var ff=document.getElementById('task-end').value;
+ 	var obs=document.getElementById('task-obs').value;
+ 	var prm=document.getElementById('task-params').value;
+ 	fetch('/Robot/UpdateTaskData',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: parseInt(id), fechaProgramada: fp? new Date(fp).toISOString(): null, fechaFin: ff? new Date(ff).toISOString(): null, parametrosJSON: prm, observaciones: obs }) })
+ 	.then(r=>r.json()).then(x=>{ if(x.success){ location.reload(); } else { alert(x.error||'Error'); } });
+ }
+ function openTaskCreateModal(){ document.getElementById('taskCreateModal').style.display='flex'; }
+ function closeTaskCreateModal(){ document.getElementById('taskCreateModal').style.display='none'; }
+ function saveTaskCreate(){
+ 	var robotId=parseInt(document.getElementById('task-create-robotid').value);
+ 	var fp=document.getElementById('task-create-fecha').value;
+ 	var ff=document.getElementById('task-create-end').value;
+ 	var tipo=parseInt(document.getElementById('task-create-type').value);
+ 	var estado=parseInt(document.getElementById('task-create-state').value);
+ 	var obs=document.getElementById('task-create-obs').value;
+ 	var prm=document.getElementById('task-create-params').value;
+ 	if(!fp){ alert('Fecha programada requerida'); return; }
+ 	var body={ IdRobot: robotId, IdTipoTarea: tipo, IdEstadoTarea: estado, FechaProgramada: fp? new Date(fp).toISOString(): null, FechaFin: ff? new Date(ff).toISOString(): null, ParametrosJSON: prm, Observaciones: obs };
+ 	fetch('/Robot/ScheduleTask',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+ 	.then(r=>r.json()).then(x=>{ if(x.success){ location.reload(); } else { alert(x.error||'Error'); } });
+ }
  </script>
 </body>
 </html>

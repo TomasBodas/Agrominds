@@ -15,6 +15,8 @@ namespace Services.Models
 		public decimal? CostoEstimado { get; set; }
 		// En la base el campo se llama Descripcion (varchar500)
 		public string Descripcion { get; set; }
+		// Nuevo flag de cierre (bit en DB). True = cerrado, False = abierto.
+		public bool Cerrado { get; set; }
 		// Alias previo para compatibilidad con vistas antiguas
 		public string Observaciones
 		{

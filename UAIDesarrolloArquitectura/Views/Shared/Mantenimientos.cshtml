@@ -14,220 +14,172 @@
 	var robots = ViewBag.Robots as IList<Robot> ?? new List<Robot>();
 }
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Robots</title>
-    <link rel="stylesheet" href="~/Content/Site.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
-    <style>
-        body {
-            font-family: 'Chivo', Arial, sans-serif;
-            background: #f5faf5;
-        }
-
-        .layout {
-            display: flex;
-            min-height: calc(100vh -60px);
-        }
-
-        .sidebar {
-            width: 240px;
-            background: #e8f5e9;
-            border-right: 1px solid #a5d6a7;
-            padding: 16px;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-        }
-
-            .sidebar a {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                color: #1b5e20;
-                text-decoration: none;
-                padding: 8px 10px;
-                border-radius: 6px;
-                margin-bottom: 6px;
-                font-weight: 600;
-            }
-
-                .sidebar a .ico {
-                    width: 18px;
-                    height: 18px;
-                    display: inline-flex;
-                }
-
-                .sidebar a:hover {
-                    background: #c8e6c9;
-                }
-
-        .content {
-            flex: 1;
-            padding: 32px 48px 40px;
-        }
-
-        .wrapper {
-            max-width: 1180px;
-            margin: 0 auto;
-        }
-
-        .section {
-            margin-bottom: 40px;
-        }
-
-            .section h2 {
-                font-size: 22px;
-                color: #2E7D32;
-                margin: 0014px;
-            }
-
-        .maint-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .maint-item {
-            background: #fff;
-            border: 1px solid #d8e2d8;
-            border-radius: 14px;
-            padding: 14px 20px;
-            box-shadow: 02px 8px rgba(46,125,50,0.10);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-            .maint-item:hover {
-                box-shadow: 04px 14px rgba(46,125,50,0.14);
-            }
-
-        .meta {
-            font-size: 13px;
-            color: #1b5e20;
-            line-height: 1.4;
-        }
-
-        .actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn {
-            border: none;
-            cursor: pointer;
-            padding: 8px 14px;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 12px;
-            background: #2E7D32;
-            color: #fff;
-        }
-
-            .btn:hover {
-                background: #1b5e20;
-            }
-
-        .empty {
-            background: #fff;
-            border: 1px dashed #cfe0cf;
-            padding: 20px;
-            border-radius: 14px;
-            text-align: center;
-            color: #1b5e20;
-            font-weight: 600;
-        }
-    </style>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>@translator.GetTraduction(service, "Maintenance")</title>
+ <link rel="stylesheet" href="~/Content/Site.css" />
+ <link rel="preconnect" href="https://fonts.googleapis.com" />
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+ <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+ <style>
+ body { font-family: 'Chivo', Arial, sans-serif; background: #f5faf5; }
+ .layout { display: flex; min-height: calc(100vh -60px); }
+ .sidebar { width:240px; background: #e8f5e9; border-right:1px solid #a5d6a7; padding:16px; position: sticky; top:0; height:100vh; }
+ .sidebar a { display: flex; align-items: center; gap:8px; color: #1b5e20; text-decoration: none; padding:8px 10px; border-radius:6px; margin-bottom:6px; font-weight:600; }
+ .sidebar a:hover { background: #c8e6c9; }
+ .sidebar a:hover, .sidebar a.active {
+         background: #c8e6c9;
+ }
+ .content { flex:1; padding:32px 48px 40px; }
+ .wrapper { max-width:1180px; margin:0 auto; }
+ .section { margin-bottom:40px; }
+ .section h2 { font-size:22px; color: #2E7D32; margin:0 0 14px 0; }
+ .maint-list { display: flex; flex-direction: column; gap:14px; }
+ .maint-item { background: #fff; border:1px solid #d8e2d8; border-radius:14px; padding:14px 20px; box-shadow:02px 8px rgba(46,125,50,0.10); display: flex; justify-content: space-between; align-items: center; }
+ .maint-item:hover { box-shadow:04px 14px rgba(46,125,50,0.14); }
+ .meta { font-size:13px; color: #1b5e20; line-height:1.4; }
+ .actions { display: flex; gap:8px; }
+ .btn { border: none; cursor: pointer; padding:8px 14px; font-size:12px; font-weight:600; border-radius:12px; background: #2E7D32; color: #fff; }
+ .btn:hover { background: #1b5e20; }
+ .empty { background: #fff; border:1px dashed #cfe0cf; padding:20px; border-radius:14px; text-align: center; color: #1b5e20; font-weight:600; }
+ .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;}
+ .modal{background:#fff;border-radius:12px;max-width:560px;width:92%;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+ .modal header{padding:14px 18px;border-bottom:1px solid #e5e5e5;font-weight:700;color:#2E7D32;}
+ .modal .body{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+ .modal .actions{padding:12px 18px;border-top:1px solid #e5e5e5;display:flex;gap:10px;justify-content:flex-end;}
+ .fld{display:flex;flex-direction:column;gap:6px;}
+ .fld label{font-size:13px;font-weight:700;color:#1b5e20;}
+ .fld input,.fld select,.fld textarea{border:1px solid #cfe0cf;border-radius:8px;padding:8px 10px;font-size:13px;}
+ .btn-secondary{background:#eceff1;color:#2b2b2b;}
+ .btn-secondary:hover{background:#dfe3e6;}
+ .add-bar{display:flex;justify-content:flex-end;margin-bottom:18px;}
+ </style>
 </head>
 <body>
-    <nav class="barra">
-        @if (Services.SessionManager.IsLogged())
-        {
-            <div id="opciones" class="opciones">
-                <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service, "Logout")</a>
-                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</a>
-                <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</a>
-                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</a>
-                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
-                <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
-                <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
-                <script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
-            </div>
-            <div class="opciones"><p style="color:white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
-        }
-        else
-        {
-            <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service, "Login")</a>
-            <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
-        }
-        <form>
-            <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages())
-            {
-                if (service.SelectedLanguage.Id == l.Id)
-                {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>}
-            else
-            {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>}
-    }</select>
-        </form>
-    </nav>
-    <div class="layout">
-        <aside class="sidebar">
-            <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
-            <a href="@Url.Action("Mantenimientos","Home")" class="active">@translator.GetTraduction(service, "Maintenance")</a>
-            <a href="@Url.Action("Telemetria","Home")">@translator.GetTraduction(service, "Telemetry")</a>
-            <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service, "Contact")</a>
-        </aside>
-        <main class="content">
-            <div class="wrapper">
-                @if (robots.Count == 0)
-                {<div class="empty">No hay robots registrados</div> }
-                else
-                {
-                    foreach (var robot in robots)
-                    {
-                        var lista = Model.ContainsKey(robot.Id) ? Model[robot.Id] : new List<MantenimientoRobot>();
-                        <div class="section" id="robot-@robot.Id">
-                            <h2>@robot.Nombre (@robot.NumeroSerie)</h2>
-                            @if (lista.Count == 0)
-                            {
-                                <div class="empty">Sin mantenimientos programados</div>
-                            }
-                            else
-                            {
-                                <div class="maint-list">
-                                    @foreach (var m in lista)
-                                    {
-                                        <div class="maint-item" data-id="@m.Id">
-                                            <div class="meta">
-                                                <strong>Fecha:</strong> @m.Fecha.ToString("yyyy-MM-dd")<br />
-                                                @if (m.DuracionHoras.HasValue)
-                                                {<span><strong>Duración:</strong> @m.DuracionHoras.Value.ToString("0.##") h</span><br />}
-                                                @if (m.CostoEstimado.HasValue)
-                                                {<span><strong>Costo:</strong> $@m.CostoEstimado.Value.ToString("0.00")</span><br />}
-                                                @if (!string.IsNullOrWhiteSpace(m.Descripcion))
-                                                {<span><strong>Descripción:</strong> @m.Descripcion</span>}
-                                            </div>
-                                            <div class="actions">
-                                                <button class="btn" onclick="cerrar(@m.Id)">Cerrar</button>
-                                                <button class="btn" onclick="detalle(@m.Id)">Detalle</button>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    }
-                }
-            </div>
-        </main>
-    </div>
-    <footer>©2026 AgroMinds — Tecnología agrícola inteligente.</footer>
-    <script>
-        function cerrar(id) { alert('Cerrar mantenimiento ' + id); }
-        function detalle(id) { alert('Detalle mantenimiento ' + id); }
-    </script>
+ <nav class="barra">
+ @if (Services.SessionManager.IsLogged()) {
+ <div id="opciones" class="opciones">
+ <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service, "Logout")</a>
+ <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</a>
+ <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</a>
+ <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</a>
+ <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
+ <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
+ <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
+ <script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
+ </div>
+ <div class="opciones"><p style="color:white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
+ } else {
+ <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service, "Login")</a>
+ <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
+ }
+ <form>
+ <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages()) { if (service.SelectedLanguage.Id == l.Id) {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>} else {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>} }</select>
+ </form>
+ </nav>
+ <div class="layout">
+ <aside class="sidebar">
+ <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
+ <a href="@Url.Action("Mantenimientos","Home")" class="active">@translator.GetTraduction(service, "Maintenance")</a>
+ <a href="@Url.Action("Telemetria","Home")">@translator.GetTraduction(service, "Telemetry")</a>
+ <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service, "Contact")</a>
+ </aside>
+ <main class="content">
+ <div class="wrapper">
+ @if (robots.Count ==0) {
+ <div class="empty">@translator.GetTraduction(service, "NoRobots")</div>
+ } else {
+ if (robots.Count >0){ <div class="add-bar"><button class="btn" type="button" onclick="openMaintCreateModal()">@translator.GetTraduction(service,"AddMaintenance")</button></div> }
+ foreach (var robot in robots) {
+ var lista = Model.ContainsKey(robot.Id) ? Model[robot.Id] : new List<MantenimientoRobot>();
+ <div class="section" id="robot-@robot.Id">
+ <h2>@robot.Nombre (@robot.NumeroSerie)</h2>
+ @if (lista.Count ==0) {
+ <div class="empty">@translator.GetTraduction(service, "NoMaintenances")</div>
+ } else {
+ <div class="maint-list">
+ @foreach (var m in lista) {
+ <div class="maint-item" data-id="@m.Id">
+ <div class="meta">
+ <strong>@translator.GetTraduction(service, "Date"):</strong> @m.Fecha.ToString("yyyy-MM-dd")<br />
+ @if (m.DuracionHoras.HasValue) {<span><strong>@translator.GetTraduction(service, "Duration"):</strong> @m.DuracionHoras.Value.ToString("0.##") h</span><br />}
+ @if (m.CostoEstimado.HasValue) {<span><strong>@translator.GetTraduction(service, "Cost"):</strong> $@m.CostoEstimado.Value.ToString("0.00")</span><br />}
+ @if (!string.IsNullOrWhiteSpace(m.Descripcion)) {<span><strong>@translator.GetTraduction(service, "Description"):</strong> @m.Descripcion</span>}<br />
+ <span><strong>@translator.GetTraduction(service,"State"):</strong> @(m.Cerrado? translator.GetTraduction(service,"Closed") : translator.GetTraduction(service,"Open"))</span>
+ </div>
+ <div class="actions">
+ @if(!m.Cerrado){<button class="btn" onclick="cerrar(@m.Id)">@translator.GetTraduction(service, "Close")</button>}
+ </div>
+ </div>
+ }
+ </div>
+ }
+ </div>
+ }
+ }
+ </div>
+ </main>
+ </div>
+ <footer>©2026 AgroMinds — Tecnología agrícola inteligente.</footer>
+ <script src="~/Scripts/scriptIdioma.js"></script>
+ <script>
+ function cerrar(id){
+		if(!confirm('¿Cerrar mantenimiento #' + id + '?')) return;
+		fetch('/Robot/CloseMaintenance',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ maintenanceId: id }) })
+		.then(r=>r.json()).then(x=>{ if(x.success){ location.reload(); } else { alert(x.error||'Error'); } });
+	}
+	function openMaintCreateModal(){ document.getElementById('maintCreateModal').style.display='flex'; }
+	function closeMaintCreateModal(){ document.getElementById('maintCreateModal').style.display='none'; }
+	function saveMaintCreate(){
+		var idRobot=parseInt(document.getElementById('mnt-robot').value);
+		var tipo=parseInt(document.getElementById('mnt-tipo').value);
+		var fechaStr=document.getElementById('mnt-fecha').value;
+		var durStr=document.getElementById('mnt-duracion').value;
+		var costoStr=document.getElementById('mnt-costo').value;
+		var desc=document.getElementById('mnt-desc').value.trim();
+		if(!idRobot||!tipo||!fechaStr){ alert('Datos requeridos'); return; }
+		var dur = durStr? parseFloat(durStr): null;
+		var costo = costoStr? parseFloat(costoStr): null;
+		var body={ IdRobot:idRobot, IdTipoMantenimiento:tipo, Fecha: fechaStr? new Date(fechaStr).toISOString(): null, DuracionHoras:dur, CostoEstimado:costo, Descripcion:desc };
+		fetch('/Robot/RegisterMaintenance',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+		.then(r=>r.json()).then(x=>{ if(x.success){ location.reload(); } else { alert(x.error||'Error'); } });
+	}
+	</script>
+ <!-- Modal crear mantenimiento -->
+ <div id="maintCreateModal" class="modal-backdrop">
+ <div class="modal" role="dialog" aria-modal="true">
+ <header>@translator.GetTraduction(service,"AddMaintenance")</header>
+ <div class="body">
+ <div class="fld">
+ <label for="mnt-robot">Robot</label>
+ <select id="mnt-robot">@foreach(var r in robots){<option value="@r.Id">@r.Nombre (@r.NumeroSerie)</option>}</select>
+ </div>
+ <div class="fld">
+ <label for="mnt-tipo">@translator.GetTraduction(service,"Type")</label>
+ <input id="mnt-tipo" type="number" min="1" step="1" value="1" />
+ </div>
+ <div class="fld">
+ <label for="mnt-fecha">@translator.GetTraduction(service,"Date")</label>
+ <input id="mnt-fecha" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+ </div>
+ <div class="fld">
+ <label for="mnt-duracion">@translator.GetTraduction(service,"Duration") (h)</label>
+ <input id="mnt-duracion" type="number" min="0" step="0.25" />
+ </div>
+ <div class="fld">
+ <label for="mnt-costo">@translator.GetTraduction(service,"Cost")</label>
+ <input id="mnt-costo" type="number" min="0" step="0.01" />
+ </div>
+ <div class="fld">
+ <label for="mnt-desc">@translator.GetTraduction(service,"Description")</label>
+ <textarea id="mnt-desc" rows="3"></textarea>
+ </div>
+ </div>
+ <div class="actions">
+ <button class="btn btn-secondary" type="button" onclick="closeMaintCreateModal()">@translator.GetTraduction(service,"Cancel")</button>
+ <button class="btn" type="button" onclick="saveMaintCreate()">@translator.GetTraduction(service,"Save")</button>
+ </div>
+ </div>
+ </div>
 </body>
 </html>

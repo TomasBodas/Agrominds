@@ -16,7 +16,7 @@
 <head>
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Telemetría</title>
+ <title>@translator.GetTraduction(service, "Telemetry")</title>
  <link rel="stylesheet" href="~/Content/Site.css" />
  <link rel="preconnect" href="https://fonts.googleapis.com" />
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,13 +28,16 @@
  .sidebar a { display:flex; align-items:center; gap:8px; color:#1b5e20; text-decoration:none; padding:8px 10px; border-radius:6px; margin-bottom:6px; font-weight:600; }
  .sidebar a .ico { width:18px; height:18px; display:inline-flex; }
  .sidebar a:hover { background:#c8e6c9; }
+ .sidebar a:hover, .sidebar a.active {
+         background: #c8e6c9;
+ }
  .content { flex:1; padding:32px 48px 40px; }
  .wrapper { max-width:1180px; margin:0 auto; }
  .section { margin-bottom:40px; }
- .section h2 { font-size:22px; color: #2E7D32; margin: 0 0 14px 0; }
+ .section h2 { font-size:22px; color: #2E7D32; margin:0 0 14px 0; }
  .tele-list { display: flex; flex-direction: column; gap:14px; }
- .tele-item { background: #fff; border:1px solid #d8e2d8; border-radius:14px; padding:14px 20px; box-shadow: 2px 8px rgba(46,125,50,0.10); display: flex; justify-content: space-between; align-items: center; }
- .tele-item:hover { box-shadow: 4px 14px rgba(46,125,50,0.14); }
+ .tele-item { background: #fff; border:1px solid #d8e2d8; border-radius:14px; padding:14px 20px; box-shadow:2px 8px rgba(46,125,50,0.10); display: flex; justify-content: space-between; align-items: center; }
+ .tele-item:hover { box-shadow:4px 14px rgba(46,125,50,0.14); }
  .meta { font-size:13px; color: #1b5e20; line-height:1.4; }
  .actions { display: flex; gap:8px; }
  .btn { border: none; cursor: pointer; padding:8px 14px; font-size:12px; font-weight:600; border-radius:12px; background: #2E7D32; color: #fff; }
@@ -65,26 +68,20 @@
  <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
  }
  <form>
- <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages())
- {
- if (service.SelectedLanguage.Id == l.Id)
- {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>}
- else
- {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>}
- }</select>
+ <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages()) { if (service.SelectedLanguage.Id == l.Id) {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>} else {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>} }</select>
  </form>
  </nav>
  <div class="layout">
-     <aside class="sidebar">
-         <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
-         <a href="@Url.Action("Mantenimientos","Home")">@translator.GetTraduction(service, "Maintenance")</a>
-         <a href="@Url.Action("Telemetria","Home")" class="active">@translator.GetTraduction(service, "Telemetry")</a>
-         <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service, "Contact")</a>
-     </aside>
+ <aside class="sidebar">
+ <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
+ <a href="@Url.Action("Mantenimientos","Home")">@translator.GetTraduction(service, "Maintenance")</a>
+ <a href="@Url.Action("Telemetria","Home")" class="active">@translator.GetTraduction(service, "Telemetry")</a>
+ <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service, "Contact")</a>
+ </aside>
  <main class="content">
  <div class="wrapper">
  @if (robots.Count ==0)
- {<div class="empty">No hay robots registrados</div> }
+ {<div class="empty">@translator.GetTraduction(service, "NoRobots")</div> }
  else
  {
  foreach (var robot in robots)
@@ -94,7 +91,7 @@
  <h2>@robot.Nombre (@robot.NumeroSerie)</h2>
  @if (lista.Count ==0)
  {
- <div class="empty">Sin registros de telemetría</div>
+ <div class="empty">@translator.GetTraduction(service, "NoTelemetry")</div>
  }
  else
  {
@@ -103,18 +100,15 @@
  {
  <div class="tele-item" data-id="@t.Id">
  <div class="meta">
- <strong>Fecha:</strong> @t.FechaHora.ToString("yyyy-MM-dd HH:mm")<br />
+ <strong>@translator.GetTraduction(service, "Date"):</strong> @t.FechaHora.ToString("yyyy-MM-dd HH:mm")<br />
  @if (t.NivelBateria.HasValue)
- {<span><strong>Batería:</strong> @t.NivelBateria.Value %</span><br />}
+ {<span><strong>@translator.GetTraduction(service, "Battery"):</strong> @t.NivelBateria.Value %</span><br />}
  @if (t.Temperatura.HasValue)
- {<span><strong>Temp:</strong> @t.Temperatura.Value.ToString("0.##") °C</span><br />}
+ {<span><strong>@translator.GetTraduction(service, "Temperature"):</strong> @t.Temperatura.Value.ToString("0.##") °C</span><br />}
  @if (!string.IsNullOrWhiteSpace(t.Estado))
- {<span><strong>Estado:</strong> <span class="estado">@t.Estado</span></span><br />}
+ {<span><strong>@translator.GetTraduction(service, "State"):</strong> <span class="estado">@t.Estado</span></span><br />}
  @if (!string.IsNullOrWhiteSpace(t.DatosJSON))
- {<span><strong>Datos:</strong> <small>@(t.DatosJSON.Length >90 ? t.DatosJSON.Substring(0,90)+"..." : t.DatosJSON)</small></span>}
- </div>
- <div class="actions">
- <button class="btn" onclick="detalle(@t.Id)">Detalle</button>
+ {<span><strong>@translator.GetTraduction(service, "Data"):</strong> <small>@(t.DatosJSON.Length >90 ? t.DatosJSON.Substring(0,90)+"..." : t.DatosJSON)</small></span>}
  </div>
  </div>
  }
@@ -127,6 +121,7 @@
  </main>
  </div>
  <footer>©2026 AgroMinds — Tecnología agrícola inteligente.</footer>
+ <script src="~/Scripts/scriptIdioma.js"></script>
  <script>
  function detalle(id) { alert('Detalle telemetría ' + id); }
  </script>

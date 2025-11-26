@@ -12,5 +12,6 @@ namespace Services.Models
 		public DateTime? FechaInicio { get; set; }
 		public DateTime? FechaFin { get; set; }
 		public string ParametrosJSON { get; set; }
+		public string Observaciones { get; set; } // Nueva columna en tabla tarea_robot
 	}
 }

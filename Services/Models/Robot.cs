@@ -10,5 +10,9 @@ namespace Services.Models
 		public int Bateria { get; set; }
 		public int IdEstadoRobot { get; set; }
 		public DateTime? FechaAlta { get; set; }
+		public DateTime? UltimaConexion { get; set; } // Nueva propiedad
+		public decimal? Latitud { get; set; } // Nueva propiedad
+		public decimal? Longitud { get; set; } // Nueva propiedad
+		public int IdUsuarioResponsable { get; set; }
 	}
 }
