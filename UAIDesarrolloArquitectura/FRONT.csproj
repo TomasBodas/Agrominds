@@ -197,7 +197,6 @@
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="ObtPrecios.asmx" />
-    <Content Include="script.sql" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Connected Services\ServicePrecios\ObtPrecios.wsdl" />
@@ -248,6 +247,7 @@
     <Content Include="Views\Shared\Telemetria.cshtml" />
     <Content Include="Views\Shared\ContactUs.cshtml" />
     <Content Include="Views\Shared\RobotDetalle.cshtml" />
+    <Content Include="Views\Shared\LoginResetPassword.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

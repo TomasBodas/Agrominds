@@ -6,18 +6,33 @@ using Services.Perfiles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
 using System.Web;
 using System.Web.Mvc;
-using System.Web.UI.WebControls;
 using UAIDesarrolloArquitectura.Models.ViewModel;
+using Services.Email; // agregado
+using System.Security.Cryptography;
+using System.Text;
 
 namespace UAIDesarrolloArquitectura.Controllers
 {
     public class LoginController : Controller
     {
         private readonly DAL_User _dalUser = new DAL_User();
+        private readonly EmailService _emailService = new EmailService();
+
+        private static readonly string ResetSecret = System.Configuration.ConfigurationManager.AppSettings["ResetSecret"] ?? "changeme-secret";
+        private static readonly TimeSpan ResetTokenTtl = TimeSpan.FromMinutes(30);
+
+        private static long GetUnixTimeSeconds()
+        {
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return (long)(DateTime.UtcNow - epoch).TotalSeconds;
+        }
+        private static DateTime FromUnixTimeSeconds(long seconds)
+        {
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return epoch.AddSeconds(seconds);
+        }
 
         [HttpGet]
         public ActionResult Login()
@@ -99,7 +114,7 @@ namespace UAIDesarrolloArquitectura.Controllers
         }
 
         [HttpPost]
-        public ActionResult ForgotPassword()
+        public async System.Threading.Tasks.Task<ActionResult> ForgotPassword()
         {
             try
             {
@@ -109,30 +124,48 @@ namespace UAIDesarrolloArquitectura.Controllers
                     var body = reader.ReadToEnd();
                     var email = Newtonsoft.Json.Linq.JObject.Parse(body).Value<string>("email");
                     if (string.IsNullOrWhiteSpace(email)) return Json(new { success = false, error = "Email requerido" });
-                    var tempPass = Guid.NewGuid().ToString("N").Substring(0,10);
-                    bool ok = _dalUser.UpdatePasswordByEmail(email, tempPass);
-                    if (!ok) return Json(new { success = false, error = "Usuario no encontrado" });
-                    // Recalcular dígitos verificadores tras actualizar la base
-                    try { new BLL_CheckDigitsManager().SetCheckDigits(); } catch { }
+
+                    // Validar que exista usuario
+                    var emailHash = PasswordEncrypter.EncryptData(email);
+                    var user = _dalUser.findByEmail(emailHash);
+                    if (user == null) return Json(new { success = false, error = "Usuario no encontrado" });
+
+                    // Generar token firmado (email | ts | signature)
+                    var ts = GetUnixTimeSeconds().ToString();
+                    var payload = email + "|" + ts;
+                    var sig = ComputeHmac(payload, ResetSecret);
+                    var token = Convert.ToBase64String(Encoding.UTF8.GetBytes(payload + "|" + sig));
+                    var resetUrl = Url.Action("ConfirmReset", "Login", new { t = token }, Request.Url.Scheme);
+
+                    // Enviar email con link
+                    bool sent = false;
                     try
                     {
-                        var msg = new MailMessage("no-reply@agrominds.test", email)
-                        { Subject = "Recuperación de contraseña", Body = $"Su nueva contraseña temporal es: {tempPass}" };
-                        // Use Web.config system.net/mailSettings
-                        using (var client = new SmtpClient()) { client.Send(msg); }
+                        var html = $"<p>Solicitaste recuperar tu contraseña.</p><p>Haz click en el siguiente enlace para confirmar y establecer una nueva:</p><p><a href=\"{resetUrl}\">Recuperar contraseña</a></p><p>Este enlace vence en30 minutos.</p>";
+                        sent = await _emailService.SendEmailAsync(email, "Recuperación de contraseña", html).ConfigureAwait(false);
                     }
                     catch (Exception mailEx)
                     {
-                        System.Diagnostics.Trace.TraceError($"SMTP send failed: {mailEx}");
-                        // swallow email errors but keep password changed
+                        System.Diagnostics.Trace.TraceError($"MailKit send failed: {mailEx}");
                     }
-                    return Json(new { success = true });
+                    return Json(new { success = true, emailSent = sent });
                 }
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, error = ex.Message });
             }
+        }
+
+        [HttpGet]
+        public ActionResult ConfirmReset(string t)
+        {
+            var info = ValidateResetToken(t);
+            if (info == null) return View("CorruptDatabaseMessage"); // vista genérica de error
+            // Mostrar formulario para nueva contraseña
+            ViewBag.Email = info.Item1;
+            ViewBag.Token = t;
+            return View("LoginResetPassword"); // crear vista simple si no existe
         }
 
         [HttpPost]
@@ -162,6 +195,10 @@ namespace UAIDesarrolloArquitectura.Controllers
 
                     try { new BLL_CheckDigitsManager().SetCheckDigits(); } catch { }
                     _dalUser.EventLog(user.id, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "Login", "Cambio de contraseña");
+                    // Email de confirmación (no bloqueante, y log de resultado)
+                    bool sent = false;
+                    try { sent = _emailService.SendPasswordChangedAsync(user.Email, user.Name).Result; } catch { }
+                    try { _dalUser.EventLog(user.id, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "Login", sent ? "Email cambio de contraseña enviado" : "Email cambio de contraseña falló"); } catch { }
                     return Json(new { success = true });
                 }
             }
@@ -169,6 +206,54 @@ namespace UAIDesarrolloArquitectura.Controllers
             {
                 return Json(new { success = false, error = ex.Message });
             }
+        }
+
+        [HttpPost]
+        public ActionResult CompleteReset(string t, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(newPassword)) return Json(new { success = false, error = "Nueva contraseña requerida" });
+            var info = ValidateResetToken(t);
+            if (info == null) return Json(new { success = false, error = "Token inválido o vencido" });
+            var email = info.Item1;
+            var emailHash = PasswordEncrypter.EncryptData(email);
+            var user = _dalUser.findByEmail(emailHash);
+            if (user == null) return Json(new { success = false, error = "Usuario no encontrado" });
+            var ok = _dalUser.UpdatePasswordByEmail(email, newPassword);
+            if (!ok) return Json(new { success = false, error = "No se pudo actualizar" });
+            try { new BLL_CheckDigitsManager().SetCheckDigits(); } catch { }
+            _dalUser.EventLog(user.id, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "Login", "Recuperación de contraseña confirmada");
+            try { new BLL_CheckDigitsManager().SetCheckDigits(); } catch { }
+            return Json(new { success = true });
+        }
+
+        private static string ComputeHmac(string data, string secret)
+        {
+            using (var h = new HMACSHA256(Encoding.UTF8.GetBytes(secret)))
+            {
+                return Convert.ToBase64String(h.ComputeHash(Encoding.UTF8.GetBytes(data)));
+            }
+        }
+
+        // returns (email, timestamp) if valid; otherwise null
+        private Tuple<string, string> ValidateResetToken(string token)
+        {
+            try
+            {
+                var raw = Encoding.UTF8.GetString(Convert.FromBase64String(token));
+                var parts = raw.Split('|');
+                if (parts.Length !=3) return null;
+                var email = parts[0];
+                var tsStr = parts[1];
+                var sig = parts[2];
+                var expected = ComputeHmac(email + "|" + tsStr, ResetSecret);
+                if (!string.Equals(sig, expected, StringComparison.Ordinal)) return null;
+                long ts;
+                if (!long.TryParse(tsStr, out ts)) return null;
+                var issued = FromUnixTimeSeconds(ts);
+                if (DateTime.UtcNow - issued > ResetTokenTtl) return null;
+                return Tuple.Create(email, tsStr);
+            }
+            catch { return null; }
         }
     }
 }

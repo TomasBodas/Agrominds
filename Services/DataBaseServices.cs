@@ -7,12 +7,13 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Web;
+using System.Configuration; // agregado
 
 namespace Services
 {
     public static class DataBaseServices
     {
-        private static readonly string CONNECTION_STRING = "Data Source=DESKTOP-4OC5GG6\\SQLEXPRESS;Initial Catalog = Agrominds; Integrated Security = True; Connect Timeout = 30; Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+        private static readonly string CONNECTION_STRING = ConfigurationManager.ConnectionStrings["AgromindsDb"].ConnectionString;
 
         public static string getConnectionString()
         {
@@ -25,7 +26,7 @@ namespace Services
                 using (SqlConnection connection = new SqlConnection(CONNECTION_STRING))
                 {
                     connection.Open();
-                    string backupQuery = $"BACKUP Database Agrominds TO DISK = 'D:\\backups\\MiBackup - {DateTime.Now.ToString("yyyyMMddHHmmss")}.bak'";
+                    string backupQuery = $"BACKUP Database Agrominds TO DISK = 'D:\\backups\\MiBackup - {DateTime.Now:yyyyMMddHHmmss}.bak'";
                     using (SqlCommand command = new SqlCommand(backupQuery, connection))
                     {
                         command.ExecuteNonQuery();
