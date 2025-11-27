@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Services.Idioma
 {
@@ -10,7 +7,14 @@ namespace Services.Idioma
     {
         public string GetTraduction(LanguageService pService, string name)
         {
-            return pService.SelectedLanguage.ListTranslate.FirstOrDefault(t => t.Name == name).Text;
+            if (pService == null || pService.SelectedLanguage == null)
+                return "NOWORD";
+            var list = pService.SelectedLanguage.ListTranslate;
+            if (list == null)
+                return "NOWORD";
+            var item = list.FirstOrDefault(t => t != null && t.Name == name);
+            var text = item?.Text;
+            return string.IsNullOrEmpty(text) ? "NOWORD" : text;
         }
     }
 }

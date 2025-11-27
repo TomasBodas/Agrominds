@@ -8,25 +8,26 @@
  Services.LanguageService service = lC.GetService();
  service.Susbcribe(translator);
  if (Services.SessionManager.IsLogged()) { service.ChangeLanguage((Services.SessionManager.GetInstance.User.LanguageId).ToString()); } else { if (!service.SelectedLanguageExists()) { service.ChangeLanguage("1"); } }
+ var precios = ViewBag.Precios as System.Collections.IList; // esperado:3 precios del WS
 }
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Planes</title>
+ <title>@translator.GetTraduction(service,"Plans")</title>
  <link rel="stylesheet" href="~/Content/Site.css">
  <link rel="preconnect" href="https://fonts.googleapis.com">
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
  <script>
  let addToCart = (planName, price) => {
- let logged =  "@Services.SessionManager.IsLogged()";
+ let logged = "@Services.SessionManager.IsLogged()";
  if (logged == "True") {
  let cart = JSON.parse(sessionStorage.getItem('cart')) || [];
  cart.push({ name: planName, price: price });
  sessionStorage.setItem('cart', JSON.stringify(cart));
- alert('Producto agregado al carrito');
+ alert('NO');
  }
- else alert('Debe iniciar sesión para agregar productos al carrito');
+ else alert('NO');
  }
  </script>
 </head>
@@ -56,7 +57,6 @@
  <nav class="menu-secundario">
  <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
  <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
- <a href="@Url.Action("Servicios", "Home")">@translator.GetTraduction(service, "Services")</a>
  <a href="@Url.Action("Nosotros", "Home")">@translator.GetTraduction(service, "AboutUs")</a>
  <a href="@Url.Action("Contact", "Home")">@translator.GetTraduction(service, "Contact")</a>
  </nav>
@@ -66,12 +66,12 @@
  <div class="card-header" style="background-color:#43A047;">
  <h2 class="h2-plans">Plan Basic</h2>
  </div>
- <p class="final-price">USD 2,000 <span>/mes</span></p>
- <p class="discount">Ideal para pequeños productores</p>
+ <p class="final-price">USD @((precios!=null && precios.Count>0)? precios[0] : "1,500") <span>/@translator.GetTraduction(service,"Month")</span></p>
+ <p class="discount">@translator.GetTraduction(service,"PlanBasicDesc")</p>
  <ul class="features">
- <li>✔ Monitoreo de cultivos con sensores IoT</li>
- <li>✔ Reportes básicos de humedad y temperatura</li>
- <li>✔ Alerta temprana de plagas</li>
+ <li>✔ @translator.GetTraduction(service,"FeatIoTMonitoring")</li>
+ <li>✔ @translator.GetTraduction(service,"FeatBasicReports")</li>
+ <li>✔ @translator.GetTraduction(service,"FeatPestAlert")</li>
  </ul>
  </div>
 
@@ -80,12 +80,12 @@
  <div class="card-header" style="background-color:#43A047;">
  <h2 class="h2-plans">Plan Pro</h2>
  </div>
- <p class="final-price">USD 3,000 <span>/mes</span></p>
- <p class="discount">Para medianas empresas agrícolas</p>
+ <p class="final-price">USD @((precios!=null && precios.Count>1)? precios[1] : "3,000") <span>/@translator.GetTraduction(service,"Month")</span></p>
+ <p class="discount">@translator.GetTraduction(service,"PlanProDesc")</p>
  <ul class="features">
- <li>✔ Control automatizado de riego y fertilización</li>
- <li>✔ Monitoreo de productividad en tiempo real</li>
- <li>✔ Detección de anomalías mediante IA</li>
+ <li>✔ @translator.GetTraduction(service,"FeatIrrigationFertilization")</li>
+ <li>✔ @translator.GetTraduction(service,"FeatRealtimeProductivity")</li>
+ <li>✔ @translator.GetTraduction(service,"FeatAIAnomalies")</li>
  </ul>
  </div>
 
@@ -94,16 +94,16 @@
  <div class="card-header" style="background-color:#43A047;">
  <h2 class="h2-plans">Plan Premium</h2>
  </div>
- <p class="final-price">USD 4,000 <span>/mes</span></p>
- <p class="discount">Para cooperativas o grandes productores</p>
+ <p class="final-price">USD @((precios!=null && precios.Count>2)? precios[2] : "5,000") <span>/@translator.GetTraduction(service,"Month")</span></p>
+ <p class="discount">@translator.GetTraduction(service,"PlanPremiumDesc")</p>
  <ul class="features">
- <li>✔ Automatización total: siembra, riego, monitoreo y cosecha</li>
- <li>✔ Mantenimiento predictivo con inteligencia artificial</li>
- <li>✔ Soporte técnico prioritario 24/7</li>
+ <li>✔ @translator.GetTraduction(service,"FeatFullAutomation")</li>
+ <li>✔ @translator.GetTraduction(service,"FeatPredictiveMaintenance")</li>
+ <li>✔ @translator.GetTraduction(service,"FeatPrioritySupport")</li>
  </ul>
  </div>
  </div>
- <footer style="background-color:#2E7D32; color:white; padding:10px; text-align:center;">©2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.</footer>
+ <footer style="background-color:#2E7D32; color:white; padding:10px; text-align:center;">©2026 AgroMinds — @translator.GetTraduction(service,"AllRightsReserved")</footer>
  <script src="~/Scripts/scriptIdioma.js"></script>
 </body>
 </html>

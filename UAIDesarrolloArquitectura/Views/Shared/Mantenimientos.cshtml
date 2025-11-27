@@ -56,130 +56,153 @@
  </style>
 </head>
 <body>
- <nav class="barra">
- @if (Services.SessionManager.IsLogged()) {
- <div id="opciones" class="opciones">
- <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service, "Logout")</a>
- <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</a>
- <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</a>
- <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</a>
- <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
- <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
- <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
- <script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
- </div>
- <div class="opciones"><p style="color:white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
- } else {
- <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service, "Login")</a>
- <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
- }
- <form>
- <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages()) { if (service.SelectedLanguage.Id == l.Id) {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>} else {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>} }</select>
- </form>
- </nav>
- <div class="layout">
- <aside class="sidebar">
- <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
- <a href="@Url.Action("Mantenimientos","Home")" class="active">@translator.GetTraduction(service, "Maintenance")</a>
- <a href="@Url.Action("Telemetria","Home")">@translator.GetTraduction(service, "Telemetry")</a>
- <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service, "Contact")</a>
- </aside>
- <main class="content">
- <div class="wrapper">
- @if (robots.Count ==0) {
- <div class="empty">@translator.GetTraduction(service, "NoRobots")</div>
- } else {
- if (robots.Count >0){ <div class="add-bar"><button class="btn" type="button" onclick="openMaintCreateModal()">@translator.GetTraduction(service,"AddMaintenance")</button></div> }
- foreach (var robot in robots) {
- var lista = Model.ContainsKey(robot.Id) ? Model[robot.Id] : new List<MantenimientoRobot>();
- <div class="section" id="robot-@robot.Id">
- <h2>@robot.Nombre (@robot.NumeroSerie)</h2>
- @if (lista.Count ==0) {
- <div class="empty">@translator.GetTraduction(service, "NoMaintenances")</div>
- } else {
- <div class="maint-list">
- @foreach (var m in lista) {
- <div class="maint-item" data-id="@m.Id">
- <div class="meta">
- <strong>@translator.GetTraduction(service, "Date"):</strong> @m.Fecha.ToString("yyyy-MM-dd")<br />
- @if (m.DuracionHoras.HasValue) {<span><strong>@translator.GetTraduction(service, "Duration"):</strong> @m.DuracionHoras.Value.ToString("0.##") h</span><br />}
- @if (m.CostoEstimado.HasValue) {<span><strong>@translator.GetTraduction(service, "Cost"):</strong> $@m.CostoEstimado.Value.ToString("0.00")</span><br />}
- @if (!string.IsNullOrWhiteSpace(m.Descripcion)) {<span><strong>@translator.GetTraduction(service, "Description"):</strong> @m.Descripcion</span>}<br />
- <span><strong>@translator.GetTraduction(service,"State"):</strong> @(m.Cerrado? translator.GetTraduction(service,"Closed") : translator.GetTraduction(service,"Open"))</span>
- </div>
- <div class="actions">
- @if(!m.Cerrado){<button class="btn" onclick="cerrar(@m.Id)">@translator.GetTraduction(service, "Close")</button>}
- </div>
- </div>
- }
- </div>
- }
- </div>
- }
- }
- </div>
- </main>
- </div>
- <footer>©2026 AgroMinds — Tecnología agrícola inteligente.</footer>
- <script src="~/Scripts/scriptIdioma.js"></script>
- <script>
- function cerrar(id){
-		if(!confirm('¿Cerrar mantenimiento #' + id + '?')) return;
-		fetch('/Robot/CloseMaintenance',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ maintenanceId: id }) })
-		.then(r=>r.json()).then(x=>{ if(x.success){ location.reload(); } else { alert(x.error||'Error'); } });
-	}
-	function openMaintCreateModal(){ document.getElementById('maintCreateModal').style.display='flex'; }
-	function closeMaintCreateModal(){ document.getElementById('maintCreateModal').style.display='none'; }
-	function saveMaintCreate(){
-		var idRobot=parseInt(document.getElementById('mnt-robot').value);
-		var tipo=parseInt(document.getElementById('mnt-tipo').value);
-		var fechaStr=document.getElementById('mnt-fecha').value;
-		var durStr=document.getElementById('mnt-duracion').value;
-		var costoStr=document.getElementById('mnt-costo').value;
-		var desc=document.getElementById('mnt-desc').value.trim();
-		if(!idRobot||!tipo||!fechaStr){ alert('Datos requeridos'); return; }
-		var dur = durStr? parseFloat(durStr): null;
-		var costo = costoStr? parseFloat(costoStr): null;
-		var body={ IdRobot:idRobot, IdTipoMantenimiento:tipo, Fecha: fechaStr? new Date(fechaStr).toISOString(): null, DuracionHoras:dur, CostoEstimado:costo, Descripcion:desc };
-		fetch('/Robot/RegisterMaintenance',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
-		.then(r=>r.json()).then(x=>{ if(x.success){ location.reload(); } else { alert(x.error||'Error'); } });
-	}
-	</script>
- <!-- Modal crear mantenimiento -->
- <div id="maintCreateModal" class="modal-backdrop">
- <div class="modal" role="dialog" aria-modal="true">
- <header>@translator.GetTraduction(service,"AddMaintenance")</header>
- <div class="body">
- <div class="fld">
- <label for="mnt-robot">Robot</label>
- <select id="mnt-robot">@foreach(var r in robots){<option value="@r.Id">@r.Nombre (@r.NumeroSerie)</option>}</select>
- </div>
- <div class="fld">
- <label for="mnt-tipo">@translator.GetTraduction(service,"Type")</label>
- <input id="mnt-tipo" type="number" min="1" step="1" value="1" />
- </div>
- <div class="fld">
- <label for="mnt-fecha">@translator.GetTraduction(service,"Date")</label>
- <input id="mnt-fecha" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
- </div>
- <div class="fld">
- <label for="mnt-duracion">@translator.GetTraduction(service,"Duration") (h)</label>
- <input id="mnt-duracion" type="number" min="0" step="0.25" />
- </div>
- <div class="fld">
- <label for="mnt-costo">@translator.GetTraduction(service,"Cost")</label>
- <input id="mnt-costo" type="number" min="0" step="0.01" />
- </div>
- <div class="fld">
- <label for="mnt-desc">@translator.GetTraduction(service,"Description")</label>
- <textarea id="mnt-desc" rows="3"></textarea>
- </div>
- </div>
- <div class="actions">
- <button class="btn btn-secondary" type="button" onclick="closeMaintCreateModal()">@translator.GetTraduction(service,"Cancel")</button>
- <button class="btn" type="button" onclick="saveMaintCreate()">@translator.GetTraduction(service,"Save")</button>
- </div>
- </div>
- </div>
+    <nav class="barra">
+        @if (Services.SessionManager.IsLogged())
+        {
+            <div id="opciones" class="opciones">
+                <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service, "Logout")</a>
+                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</a>
+                <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</a>
+                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</a>
+                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
+                <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
+                <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
+                <script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
+            </div>
+            <div class="opciones"><p style="color:white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
+        }
+        else
+        {
+            <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service, "Login")</a>
+            <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
+        }
+        <form>
+            <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages())
+            {
+                if (service.SelectedLanguage.Id == l.Id)
+                {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>}
+            else
+            {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>}
+    }</select>
+        </form>
+    </nav>
+    <div class="layout">
+        <aside class="sidebar">
+            <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
+            <a href="@Url.Action("Mantenimientos","Home")" class="active">@translator.GetTraduction(service, "Maintenance")</a>
+            <a href="@Url.Action("Telemetria","Home")">@translator.GetTraduction(service, "Telemetry")</a>
+            <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service, "Contact")</a>
+        </aside>
+        <main class="content">
+            <div class="wrapper">
+                @if (robots.Count == 0)
+                {
+                    <div class="empty">@translator.GetTraduction(service, "NoRobots")</div>
+                }
+                else
+                {
+                    if (robots.Count > 0)
+                    { <div class="add-bar"><button class="btn" type="button" onclick="openMaintCreateModal()">@translator.GetTraduction(service, "AddMaintenance")</button></div> }
+                foreach (var robot in robots)
+                {
+                    var lista = Model.ContainsKey(robot.Id) ? Model[robot.Id] : new List<MantenimientoRobot>();
+                    <div class="section" id="robot-@robot.Id">
+                        <h2>@robot.Nombre (@robot.NumeroSerie)</h2>
+                        @if (lista.Count == 0)
+                        {
+                            <div class="empty">@translator.GetTraduction(service, "NoMaintenances")</div>
+                        }
+                        else
+                        {
+                            <div class="maint-list">
+                                @foreach (var m in lista)
+                                {
+                                    <div class="maint-item" data-id="@m.Id">
+                                        <div class="meta">
+                                            <strong>@translator.GetTraduction(service, "Date"):</strong> @m.Fecha.ToString("yyyy-MM-dd")<br />
+                                            @if (m.DuracionHoras.HasValue)
+                                            {<span><strong>@translator.GetTraduction(service, "Duration"):</strong> @m.DuracionHoras.Value.ToString("0.##") h</span><br />}
+                                            @if (m.CostoEstimado.HasValue)
+                                            {<span><strong>@translator.GetTraduction(service, "Cost"):</strong> $@m.CostoEstimado.Value.ToString("0.00")</span><br />}
+                                            @if (!string.IsNullOrWhiteSpace(m.Descripcion))
+                                            {<span><strong>@translator.GetTraduction(service, "Description"):</strong> @m.Descripcion</span>}<br />
+                                            <span><strong>@translator.GetTraduction(service, "State"):</strong> @(m.Cerrado? translator.GetTraduction(service,"Closed") : translator.GetTraduction(service,"Open"))</span>
+                                        </div>
+                                        <div class="actions">
+                                            @if (!m.Cerrado)
+                                            {<button class="btn" onclick="cerrar(@m.Id)">@translator.GetTraduction(service, "Close")</button>}
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            </div>
+        </main>
+    </div>
+    <footer style="background-color:#2E7D32; color:white; padding:10px; text-align:center;">©2026 AgroMinds — @translator.GetTraduction(service, "AllRightsReserved")</footer>
+    <script src="~/Scripts/scriptIdioma.js"></script>
+    <script>
+        function cerrar(id) {
+            if (!confirm('¿Cerrar mantenimiento #' + id + '?')) return;
+            fetch('/Robot/CloseMaintenance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ maintenanceId: id }) })
+                .then(r => r.json()).then(x => { if (x.success) { location.reload(); } else { alert(x.error || 'Error'); } });
+        }
+        function openMaintCreateModal() { document.getElementById('maintCreateModal').style.display = 'flex'; }
+        function closeMaintCreateModal() { document.getElementById('maintCreateModal').style.display = 'none'; }
+        function saveMaintCreate() {
+            var idRobot = parseInt(document.getElementById('mnt-robot').value);
+            var tipo = parseInt(document.getElementById('mnt-tipo').value);
+            var fechaStr = document.getElementById('mnt-fecha').value;
+            var durStr = document.getElementById('mnt-duracion').value;
+            var costoStr = document.getElementById('mnt-costo').value;
+            var desc = document.getElementById('mnt-desc').value.trim();
+            if (!idRobot || !tipo || !fechaStr) { alert('Datos requeridos'); return; }
+            var dur = durStr ? parseFloat(durStr) : null;
+            var costo = costoStr ? parseFloat(costoStr) : null;
+            var body = { IdRobot: idRobot, IdTipoMantenimiento: tipo, Fecha: fechaStr ? new Date(fechaStr).toISOString() : null, DuracionHoras: dur, CostoEstimado: costo, Descripcion: desc };
+            fetch('/Robot/RegisterMaintenance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+                .then(r => r.json()).then(x => { if (x.success) { location.reload(); } else { alert(x.error || 'Error'); } });
+        }
+    </script>
+    <!-- Modal crear mantenimiento -->
+    <div id="maintCreateModal" class="modal-backdrop">
+        <div class="modal" role="dialog" aria-modal="true">
+            <header>@translator.GetTraduction(service, "AddMaintenance")</header>
+            <div class="body">
+                <div class="fld">
+                    <label for="mnt-robot">Robot</label>
+                    <select id="mnt-robot">@foreach (var r in robots)
+                    {<option value="@r.Id">@r.Nombre (@r.NumeroSerie)</option>}</select>
+                </div>
+                <div class="fld">
+                    <label for="mnt-tipo">@translator.GetTraduction(service, "Type")</label>
+                    <input id="mnt-tipo" type="number" min="1" step="1" value="1" />
+                </div>
+                <div class="fld">
+                    <label for="mnt-fecha">@translator.GetTraduction(service, "Date")</label>
+                    <input id="mnt-fecha" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="fld">
+                    <label for="mnt-duracion">@translator.GetTraduction(service, "Duration") (h)</label>
+                    <input id="mnt-duracion" type="number" min="0" step="0.25" />
+                </div>
+                <div class="fld">
+                    <label for="mnt-costo">@translator.GetTraduction(service, "Cost")</label>
+                    <input id="mnt-costo" type="number" min="0" step="0.01" />
+                </div>
+                <div class="fld">
+                    <label for="mnt-desc">@translator.GetTraduction(service, "Description")</label>
+                    <textarea id="mnt-desc" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" type="button" onclick="closeMaintCreateModal()">@translator.GetTraduction(service, "Cancel")</button>
+                <button class="btn" type="button" onclick="saveMaintCreate()">@translator.GetTraduction(service, "Save")</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

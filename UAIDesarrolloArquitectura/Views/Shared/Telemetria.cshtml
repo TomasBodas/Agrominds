@@ -47,83 +47,89 @@
  </style>
 </head>
 <body>
- <nav class="barra">
- @if (Services.SessionManager.IsLogged())
- {
- <div id="opciones" class="opciones">
- <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service, "Logout")</a>
- <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</a>
- <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</a>
- <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</a>
- <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
- <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
- <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
- <script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
- </div>
- <div class="opciones"><p style="color: white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
- }
- else
- {
- <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service, "Login")</a>
- <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
- }
- <form>
- <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages()) { if (service.SelectedLanguage.Id == l.Id) {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>} else {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>} }</select>
- </form>
- </nav>
- <div class="layout">
- <aside class="sidebar">
- <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
- <a href="@Url.Action("Mantenimientos","Home")">@translator.GetTraduction(service, "Maintenance")</a>
- <a href="@Url.Action("Telemetria","Home")" class="active">@translator.GetTraduction(service, "Telemetry")</a>
- <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service, "Contact")</a>
- </aside>
- <main class="content">
- <div class="wrapper">
- @if (robots.Count ==0)
- {<div class="empty">@translator.GetTraduction(service, "NoRobots")</div> }
- else
- {
- foreach (var robot in robots)
- {
- var lista = Model.ContainsKey(robot.Id) ? Model[robot.Id] : new List<TelemetriaRobot>();
- <div class="section" id="robot-@robot.Id">
- <h2>@robot.Nombre (@robot.NumeroSerie)</h2>
- @if (lista.Count ==0)
- {
- <div class="empty">@translator.GetTraduction(service, "NoTelemetry")</div>
- }
- else
- {
- <div class="tele-list">
- @foreach (var t in lista)
- {
- <div class="tele-item" data-id="@t.Id">
- <div class="meta">
- <strong>@translator.GetTraduction(service, "Date"):</strong> @t.FechaHora.ToString("yyyy-MM-dd HH:mm")<br />
- @if (t.NivelBateria.HasValue)
- {<span><strong>@translator.GetTraduction(service, "Battery"):</strong> @t.NivelBateria.Value %</span><br />}
- @if (t.Temperatura.HasValue)
- {<span><strong>@translator.GetTraduction(service, "Temperature"):</strong> @t.Temperatura.Value.ToString("0.##") °C</span><br />}
- @if (!string.IsNullOrWhiteSpace(t.Estado))
- {<span><strong>@translator.GetTraduction(service, "State"):</strong> <span class="estado">@t.Estado</span></span><br />}
- @if (!string.IsNullOrWhiteSpace(t.DatosJSON))
- {<span><strong>@translator.GetTraduction(service, "Data"):</strong> <small>@(t.DatosJSON.Length >90 ? t.DatosJSON.Substring(0,90)+"..." : t.DatosJSON)</small></span>}
- </div>
- </div>
- }
- </div>
- }
- </div>
- }
- }
- </div>
- </main>
- </div>
- <footer>©2026 AgroMinds — Tecnología agrícola inteligente.</footer>
- <script src="~/Scripts/scriptIdioma.js"></script>
- <script>
- function detalle(id) { alert('Detalle telemetría ' + id); }
- </script>
+    <nav class="barra">
+        @if (Services.SessionManager.IsLogged())
+        {
+            <div id="opciones" class="opciones">
+                <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service, "Logout")</a>
+                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</a>
+                <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</a>
+                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</a>
+                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
+                <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
+                <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
+                <script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
+            </div>
+            <div class="opciones"><p style="color: white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
+        }
+        else
+        {
+            <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service, "Login")</a>
+            <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
+        }
+        <form>
+            <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages())
+            {
+                if (service.SelectedLanguage.Id == l.Id)
+                {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>}
+            else
+            {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>}
+    }</select>
+        </form>
+    </nav>
+    <div class="layout">
+        <aside class="sidebar">
+            <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
+            <a href="@Url.Action("Mantenimientos","Home")">@translator.GetTraduction(service, "Maintenance")</a>
+            <a href="@Url.Action("Telemetria","Home")" class="active">@translator.GetTraduction(service, "Telemetry")</a>
+            <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service, "Contact")</a>
+        </aside>
+        <main class="content">
+            <div class="wrapper">
+                @if (robots.Count == 0)
+                {<div class="empty">@translator.GetTraduction(service, "NoRobots")</div> }
+            else
+            {
+                foreach (var robot in robots)
+                {
+                    var lista = Model.ContainsKey(robot.Id) ? Model[robot.Id] : new List<TelemetriaRobot>();
+                    <div class="section" id="robot-@robot.Id">
+                        <h2>@robot.Nombre (@robot.NumeroSerie)</h2>
+                        @if (lista.Count == 0)
+                        {
+                            <div class="empty">@translator.GetTraduction(service, "NoTelemetry")</div>
+                        }
+                        else
+                        {
+                            <div class="tele-list">
+                                @foreach (var t in lista)
+                                {
+                                    <div class="tele-item" data-id="@t.Id">
+                                        <div class="meta">
+                                            <strong>@translator.GetTraduction(service, "Date"):</strong> @t.FechaHora.ToString("yyyy-MM-dd HH:mm")<br />
+                                            @if (t.NivelBateria.HasValue)
+                                            {<span><strong>@translator.GetTraduction(service, "Battery"):</strong> @t.NivelBateria.Value %</span><br />}
+                                            @if (t.Temperatura.HasValue)
+                                            {<span><strong>@translator.GetTraduction(service, "Temperature"):</strong> @t.Temperatura.Value.ToString("0.##") °C</span><br />}
+                                            @if (!string.IsNullOrWhiteSpace(t.Estado))
+                                            {<span><strong>@translator.GetTraduction(service, "State"):</strong> <span class="estado">@t.Estado</span></span><br />}
+                                            @if (!string.IsNullOrWhiteSpace(t.DatosJSON))
+                                            {<span><strong>@translator.GetTraduction(service, "Data"):</strong> <small>@(t.DatosJSON.Length >90 ? t.DatosJSON.Substring(0,90)+"..." : t.DatosJSON)</small></span>}
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            </div>
+        </main>
+    </div>
+    <footer style="background-color:#2E7D32; color:white; padding:10px; text-align:center;">©2026 AgroMinds — @translator.GetTraduction(service, "AllRightsReserved")</footer>
+    <script src="~/Scripts/scriptIdioma.js"></script>
+    <script>
+        function detalle(id) { alert('Detalle telemetría ' + id); }
+    </script>
 </body>
 </html>

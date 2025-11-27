@@ -117,7 +117,7 @@
 
         .field-validation-error {
             display: block;
-        }s
+        }
     </style>
 
 </head>
@@ -129,7 +129,7 @@
     <form id="login-form">
         <div>
             @Html.LabelFor(m => m.Email)
-            @Html.TextBoxFor(m => m.Email, new { @type = "Email", @placeholder = "Email", @required = "required" })
+            @Html.TextBoxFor(m => m.Email, new { @type = "Email", @placeholder = "Email", @required = "required", @id = "Email" })
             @Html.ValidationMessageFor(m => m.Email)
         </div>
         <div>
@@ -141,11 +141,21 @@
     <button type="submit">@translator.GetTraduction(service, "Login")</button>
         <br />
         @Html.ActionLink("Registrarse", "Register", "Register")
+        <a href="#" id="forgot-link">@translator.GetTraduction(service, "ForgotPassword")</a>
     </form>
 </div>}
  <footer style="position: fixed; bottom:0; left:0; width:100%; background-color: #2E7D32; color: white; padding:10px; text-align: center;">
  ©2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.
  </footer>
+ <script>
+ (function(){
+ var link=document.getElementById('forgot-link');
+ if(link){ link.addEventListener('click', function(e){ e.preventDefault(); var emailInput=document.getElementById('Email'); var email = emailInput? emailInput.value.trim():''; if(!email){ email=prompt('Ingrese su email'); }
+ if(!email) return; fetch('/Login/ForgotPassword',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email }) })
+ .then(r=>r.json()).then(x=>{ alert(x.success? 'Se envió una nueva contraseña temporal a su correo.':'Error: '+(x.error||'Intente más tarde')); });
+ }); }
+ })();
+ </script>
 </body>
 </html>
 

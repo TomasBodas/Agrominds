@@ -156,7 +156,6 @@
     <nav class="menu-secundario">
         <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
         <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
-        <a href="@Url.Action("Servicios", "Home")">@translator.GetTraduction(service, "Services")</a>
         <a href="@Url.Action("Nosotros", "Home")">@translator.GetTraduction(service, "AboutUs")</a>
         <a href="@Url.Action("Contact", "Home")">@translator.GetTraduction(service, "Contact")</a>
     </nav>
@@ -165,42 +164,42 @@
             <h2>@translator.GetTraduction(service, "Contact")</h2>
         </section>
         <section class="contact-info" style="background:#fff;border-left:4px solid #2E7D32;padding:18px;border-radius:8px;box-shadow:0 8px 24px rgba(46,125,50,0.08);margin-top:20px;">
- <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
-  <div style="min-width:240px;">
-   <h3 style="margin:0 0 8px; color:#2E7D32;">AgroMinds</h3>
-   <p style="margin:4px 0;"><strong>Dirección:</strong> Ruta Provincial 9, Km 1234, Córdoba, Argentina</p>
-   <p style="margin:4px 0;"><strong>Teléfono:</strong> <a href="tel:+5491112345678" style="color:#2E7D32;text-decoration:none;">+54 9 11 1234 5678</a></p>
-   <p style="margin:4px 0;"><strong>Email:</strong> <a href="mailto:contacto@agrominds.com.ar" style="color:#2E7D32;text-decoration:none;">contacto@agrominds.com.ar</a></p>
-   <p style="margin:4px 0;"><strong>Horario:</strong> Lun - Vie 9:00 - 18:00</p>
-  </div>
-  <div style="flex:1;min-width:220px;">
-   <h4 style="margin:0 0 8px; color:#2E7D32;">Soporte & Ventas</h4>
-   <p style="margin:4px 0;"><strong>Soporte:</strong> <a href="mailto:soporte@agrominds.com.ar" style="color:#2E7D32;text-decoration:none;">soporte@agrominds.com.ar</a></p>
-   <p style="margin:4px 0;"><strong>Ventas:</strong> <a href="mailto:ventas@agrominds.com.ar" style="color:#2E7D32;text-decoration:none;">ventas@agrominds.com.ar</a></p>
-   <p style="margin:8px 0 0;">Síguenos:</p>
-   <p style="margin:6px 0 0;">
-    <a href="#" style="margin-right:8px;color:#2E7D32;text-decoration:none;">Twitter</a>
-    <a href="#" style="margin-right:8px;color:#2E7D32;text-decoration:none;">LinkedIn</a>
-    <a href="#" style="color:#2E7D32;text-decoration:none;">Instagram</a>
-   </p>
-  </div>
- </div>
-</section>
-<section style="margin-top:20px;">
- <form method="post" action="@Url.Action("SendContact","Home")">
-  <label for="name">Nombre</label><br />
-  <input type="text" id="name" name="name" style="width:100%;padding:8px;margin:6px 0;" required />
-  <label for="email">Email</label><br />
-  <input type="email" id="email" name="email" style="width:100%;padding:8px;margin:6px 0;" required />
-  <label for="message">Mensaje</label><br />
-  <textarea id="message" name="message" rows="6" style="width:100%;padding:8px;margin:6px 0;" required></textarea>
-  <button type="submit" style="background:#2E7D32;color:white;padding:10px 16px;border:none;border-radius:4px;">Enviar</button>
- </form>
-</section>
-</main>
-<footer style="background:#2E7D32;color:#fff;padding:10px;text-align:center;">© 2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.</footer>
-<script src="~/Scripts/scriptIdioma.js"></script>
-<!-- Cookie consent modal markup -->
+            <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+                <div style="min-width:240px;">
+                    <h3 style="margin:0 0 8px; color:#2E7D32;">AgroMinds</h3>
+                    <p style="margin:4px 0;"><strong>@translator.GetTraduction(service, "Address"):</strong> Ruta Provincial 9, Km 1234, Córdoba, Argentina</p>
+                    <p style="margin:4px 0;"><strong>@translator.GetTraduction(service, "Phone"):</strong> <a href="tel:+5491112345678" style="color:#2E7D32;text-decoration:none;">+54 9 11 1234 5678</a></p>
+                    <p style="margin:4px 0;"><strong>Email:</strong> <a href="mailto:contacto@agrominds.com.ar" style="color:#2E7D32;text-decoration:none;">contacto@agrominds.com.ar</a></p>
+                    <p style="margin:4px 0;"><strong>@translator.GetTraduction(service, "Schedule"):</strong> Lun - Vie 9:00 - 18:00</p>
+                </div>
+                <div style="flex:1;min-width:220px;">
+                    <h4 style="margin:0 0 8px; color:#2E7D32;">@translator.GetTraduction(service, "SupportSales")</h4>
+                    <p style="margin:4px 0;"><strong>@translator.GetTraduction(service, "Support"):</strong> <a href="mailto:soporte@agrominds.com.ar" style="color:#2E7D32;text-decoration:none;">soporte@agrominds.com.ar</a></p>
+                    <p style="margin:4px 0;"><strong>@translator.GetTraduction(service, "Sales"):</strong> <a href="mailto:ventas@agrominds.com.ar" style="color:#2E7D32;text-decoration:none;">ventas@agrominds.com.ar</a></p>
+                    <p style="margin:8px 0 0;">@translator.GetTraduction(service, "FollowUs")</p>
+                    <p style="margin:6px 0 0;">
+                        <a href="#" style="margin-right:8px;color:#2E7D32;text-decoration:none;">Twitter</a>
+                        <a href="#" style="margin-right:8px;color:#2E7D32;text-decoration:none;">LinkedIn</a>
+                        <a href="#" style="color:#2E7D32;text-decoration:none;">Instagram</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+        <section style="margin-top:20px;">
+            <form method="post" action="@Url.Action("SendContact","Home")">
+                <label for="name">@translator.GetTraduction(service, "Name")</label><br />
+                <input type="text" id="name" name="name" style="width:100%;padding:8px;margin:6px 0;" required />
+                <label for="email">Email</label><br />
+                <input type="email" id="email" name="email" style="width:100%;padding:8px;margin:6px 0;" required />
+                <label for="message">@translator.GetTraduction(service, "Message")</label><br />
+                <textarea id="message" name="message" rows="6" style="width:100%;padding:8px;margin:6px 0;" required></textarea>
+                <button type="submit" style="background:#2E7D32;color:white;padding:10px 16px;border:none;border-radius:4px;">@translator.GetTraduction(service, "Send")</button>
+            </form>
+        </section>
+    </main>
+    <footer style="background-color:#2E7D32; color:white; padding:10px; text-align:center;">©2026 AgroMinds — @translator.GetTraduction(service, "AllRightsReserved")</footer>
+    <script src="~/Scripts/scriptIdioma.js"></script>
+    <!-- Cookie consent modal markup -->
     <div id="cookieConsentModal" role="dialog" aria-labelledby="cookieConsentTitle" aria-describedby="cookieConsentDesc">
         <div class="consent-content">
             <div style="max-width:760px;">

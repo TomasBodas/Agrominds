@@ -73,16 +73,24 @@ namespace UAIDesarrolloArquitectura.Controllers
             {
                 return RedirectToAction("Login", "Login");
             }
-            else
+            // Solo usuario webmaster por Id (14)
+            var u = SessionManager.GetInstance.User;
+            if (u == null || u.id !=14)
             {
-                List<Language> langList = dal_language.GetLanguages();
-                return View(langList);
+                return RedirectToAction("Index", "Home");
             }
+            List<Language> langList = dal_language.GetLanguages();
+            return View(langList);
         }
 
         [HttpPost]
         public ActionResult AddLanguage(string name)
         {
+            // Solo usuario Id14
+            if (!SessionManager.IsLogged() || SessionManager.GetInstance.User?.id !=14)
+            {
+                return new HttpStatusCodeResult(403);
+            }
             List<Language> langList = dal_language.GetLanguages();
             List<string> tags = new List<string>();
 
@@ -111,6 +119,11 @@ namespace UAIDesarrolloArquitectura.Controllers
         [HttpPost]
         public ActionResult AddWord(string tag)
         {
+            // Solo usuario Id14
+            if (!SessionManager.IsLogged() || SessionManager.GetInstance.User?.id !=14)
+            {
+                return new HttpStatusCodeResult(403);
+            }
             if (string.IsNullOrWhiteSpace(tag))
             {
                 ModelState.AddModelError("tag", "Tag requerido");
@@ -128,6 +141,11 @@ namespace UAIDesarrolloArquitectura.Controllers
         [HttpPost]
         public ActionResult UpdateTranslate(int id, string tag, string text)
         {
+            // Solo usuario Id14
+            if (!SessionManager.IsLogged() || SessionManager.GetInstance.User?.id !=14)
+            {
+                return new HttpStatusCodeResult(403);
+            }
             dal_language.ModifyTranslate(id, tag, text);
             List<Language> langList = dal_language.GetLanguages();
             return View("ABMIdioma", langList);
@@ -141,7 +159,8 @@ namespace UAIDesarrolloArquitectura.Controllers
                 return RedirectToAction("Login", "Login");
             }
 
-            if (SessionManager.GetInstance.User.Name == "webmaster")
+            // Solo usuario Id14
+            if (SessionManager.GetInstance.User?.id ==14)
             {
                 List<Language> langList = dal_language.GetLanguages();
                 Language lang = langList.Find(x => x.Id == id);

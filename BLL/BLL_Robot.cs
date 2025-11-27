@@ -62,6 +62,7 @@ namespace BLL
 			if (nuevaBateria <0 || nuevaBateria >100) throw new ArgumentOutOfRangeException(nameof(nuevaBateria), "Batería fuera de rango (0-100)");
 			_dal.UpdateRobotBattery(robotId, nuevaBateria);
 			RegistrarLog(usuarioId, "Robot", $"Actualizada batería robot #{robotId} a {nuevaBateria}%");
+			RecalcularDigitosVerificadores();
 		}
 
 		public void CambiarEstado(int robotId, int nuevoEstado, int usuarioId =0)
@@ -155,6 +156,8 @@ namespace BLL
 			if (telemetria == null) throw new ArgumentNullException(nameof(telemetria));
 			if (telemetria.FechaHora == default) telemetria.FechaHora = DateTime.UtcNow;
 			_dal.InsertTelemetry(telemetria);
+			// tras escribir en telemetria_robot recalcular DV
+			RecalcularDigitosVerificadores();
 			if (actualizarBateria && telemetria.NivelBateria.HasValue)
 			{
 				ActualizarBateria(telemetria.IdRobot, telemetria.NivelBateria.Value, usuarioId);

@@ -23,17 +23,17 @@
  <style>
  ul.tree, ul.tree ul { list-style-type:none; margin:0; padding:0; }
  ul.tree ul { margin-left:20px; display:block; }
- li.Role { margin:5px0; text-align:left; }
+ li.Role { margin:5px 0; text-align:left; }
  li.Role::before { content:'▶'; display:inline-block; cursor:pointer; margin-right:5px; }
  li.Role.open::before { content:'▼'; }
- li.Permission { margin:5px0; text-align:left; }
+ li.Permission { margin:5px 0; text-align:left; }
  .container { display:flex; justify-content:center; align-items:center; gap:5px; }
  .form-container { margin:20px; padding:20px; background-color:white; border:1px solid #ccc; width:300px; display:flex; flex-direction:column; gap:15px; }
  .form-item { display:flex; flex-direction:column; gap:5px; }
  select, input[type="text"] { padding:8px; font-size:14px; border:1px solid #ccc; border-radius:4px; }
  input[type="button"] { width:auto; padding:10px; background-color:#2d53fd; color:white; border:none; border-radius:4px; cursor:pointer; }
  input[type="button"]:hover { background-color:#5270fa; }
- .container-tree { width:300px; height:400px; background-color:white; border:2px solid #ccc; padding:10px; box-shadow:04px8px rgba(0,0,0,0.1); }
+ .container-tree { width:300px; height:400px; background-color:white; border:2px solid #ccc; padding:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1); }
  footer { background-color:#2E7D32; color:white; padding:10px; text-align:center; }
  </style>
 </head>
@@ -73,7 +73,6 @@
  <nav class="menu-secundario">
  <a href="@Url.Action("Index", "Home")">@translator.GetTraduction(service, "Main")</a>
  <a href="@Url.Action("Plans", "Home")">@translator.GetTraduction(service, "Plans")</a>
- <a href="@Url.Action("Servicios", "Home")">@translator.GetTraduction(service, "Services")</a>
  <a href="@Url.Action("Nosotros", "Home")">@translator.GetTraduction(service, "AboutUs")</a>
  <a href="@Url.Action("Contact", "Home")">@translator.GetTraduction(service, "Contact")</a>
  </nav>

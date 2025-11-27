@@ -217,6 +217,37 @@ namespace DAL
                 updateUserQueryCommand.ExecuteNonQuery();
             }
         }
-           
+        public bool UpdatePasswordByEmail(string email, string newPlainPassword)
+        {
+            using (var connection = new SqlConnection(DataBaseServices.getConnectionString()))
+            {
+                connection.Open();
+                // Email se guarda cifrado; contraseña se guarda con EncryptPassword
+                string emailHash = PasswordEncrypter.EncryptData(email);
+                string passHash = PasswordEncrypter.EncryptPassword(newPlainPassword);
+                using (var cmd = new SqlCommand("UPDATE usuario SET contrasena=@pass WHERE email=@email", connection))
+                {
+                    cmd.Parameters.AddWithValue("@pass", passHash);
+                    cmd.Parameters.AddWithValue("@email", emailHash);
+                    int rows = cmd.ExecuteNonQuery();
+                    return rows >0;
+                }
+            }
+        }
+        public bool UpdatePasswordById(int userId, string newPlainPassword)
+        {
+            using (var connection = new SqlConnection(DataBaseServices.getConnectionString()))
+            {
+                connection.Open();
+                string passHash = PasswordEncrypter.EncryptPassword(newPlainPassword);
+                using (var cmd = new SqlCommand("UPDATE usuario SET contrasena=@pass WHERE id=@id", connection))
+                {
+                    cmd.Parameters.AddWithValue("@pass", passHash);
+                    cmd.Parameters.AddWithValue("@id", userId);
+                    int rows = cmd.ExecuteNonQuery();
+                    return rows >0;
+                }
+            }
+        }
     }
 }

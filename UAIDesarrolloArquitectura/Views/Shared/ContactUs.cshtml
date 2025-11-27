@@ -14,7 +14,7 @@
 <head>
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Contacto</title>
+ <title>@translator.GetTraduction(service, "Contact")</title>
  <link rel="stylesheet" href="~/Content/Site.css" />
  <link rel="preconnect" href="https://fonts.googleapis.com" />
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,83 +47,88 @@
  </style>
 </head>
 <body>
- <nav class="barra">
- @if (Services.SessionManager.IsLogged())
- {
- <div id="opciones" class="opciones">
- <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service, "Logout")</a>
- <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</a>
- <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</a>
- <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</a>
- <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
- <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
- <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
- <script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
- </div>
- <div class="opciones"><p style="color:white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
- }
- else
- {
- <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service, "Login")</a>
- <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
- }
- <form>
- <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages())
- {
- if (service.SelectedLanguage.Id == l.Id)
- {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>}
- else
- {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>}
- }</select>
- </form>
- </nav>
- <div class="layout">
-     <aside class="sidebar">
-         <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
-         <a href="@Url.Action("Mantenimientos","Home")">@translator.GetTraduction(service, "Maintenance")</a>
-         <a href="@Url.Action("Telemetria","Home")">@translator.GetTraduction(service, "Telemetry")</a>
-         <a href="@Url.Action("ContactUs","Home")" class="active">@translator.GetTraduction(service, "Contact")</a>
-     </aside>
- <main class="content">
- <div class="wrapper">
- <div class="card">
- <h2>Contacto</h2>
- <div class="flex">
- <div class="col">
- <h3>AgroMinds</h3>
- <p><strong>Dirección:</strong> Ruta Provincial9, Km1234, Córdoba, Argentina</p>
- <p><strong>Teléfono:</strong> <a class="link" href="tel:+5491112345678">+5491112345678</a></p>
- <p><strong>Email:</strong> <a class="link" href="mailto:contacto@agrominds.com.ar">contacto@agrominds.com.ar</a></p>
- <p><strong>Horario:</strong> Lun - Vie9:00 -18:00</p>
- </div>
- <div class="col" style="flex:1; min-width:220px;">
- <h3>Soporte & Ventas</h3>
- <p><strong>Soporte:</strong> <a class="link" href="mailto:soporte@agrominds.com.ar">soporte@agrominds.com.ar</a></p>
- <p><strong>Ventas:</strong> <a class="link" href="mailto:ventas@agrominds.com.ar">ventas@agrominds.com.ar</a></p>
- <p style="margin:8px 0 0;">Síguenos:</p>
- <p style="margin:6px 0 0;">
- <a class="link" href="#" style="margin-right:8px;">Twitter</a>
- <a class="link" href="#" style="margin-right:8px;">LinkedIn</a>
- <a class="link" href="#">Instagram</a>
- </p>
- </div>
- </div>
- </div>
- <div class="card">
- <h2>Formulario</h2>
- <form method="post" action="@Url.Action("SendContact","Home")">
- <label for="name">Nombre</label>
- <input type="text" id="name" name="name" required />
- <label for="email">Email</label>
- <input type="email" id="email" name="email" required />
- <label for="message">Mensaje</label>
- <textarea id="message" name="message" rows="6" required></textarea>
- <button type="submit">Enviar</button>
- </form>
- </div>
- </div>
- </main>
- </div>
- <footer>©2026 AgroMinds — Tecnología agrícola inteligente.</footer>
+    <nav class="barra">
+        @if (Services.SessionManager.IsLogged())
+        {
+            <div id="opciones" class="opciones">
+                <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service, "Logout")</a>
+                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</a>
+                <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</a>
+                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</a>
+                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
+                <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
+                <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
+                <script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
+            </div>
+            <div class="opciones"><p style="color:white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
+        }
+        else
+        {
+            <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service, "Login")</a>
+            <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
+        }
+        <form>
+            <select id="option" onchange="enviarValor()">
+                @foreach (Services.Idioma.Language l in service.GetLanguages())
+                {
+                    if (service.SelectedLanguage.Id == l.Id)
+                    {
+                        <option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>
+}
+                    else
+                    {
+                        <option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>
+}
+                }
+        </select>
+    </form>
+</nav>
+<div class="layout">
+    <aside class="sidebar">
+        <a href="@Url.Action("Robots","Home")">@translator.GetTraduction(service, "RobotsManagement")</a>
+        <a href="@Url.Action("Mantenimientos","Home")">@translator.GetTraduction(service, "Maintenance")</a>
+        <a href="@Url.Action("Telemetria","Home")">@translator.GetTraduction(service, "Telemetry")</a>
+        <a href="@Url.Action("ContactUs","Home")" class="active">@translator.GetTraduction(service, "Contact")</a>
+    </aside>
+    <main class="content">
+        <div class="wrapper">
+            <div class="card">
+                <h2>@translator.GetTraduction(service, "Contact")</h2>
+                <div class="flex">
+                    <div class="col">
+                        <h3>AgroMinds</h3>
+                        <p><strong>@translator.GetTraduction(service, "Address"):</strong> Ruta Provincial9, Km1234, Córdoba, Argentina</p>
+                        <p><strong>@translator.GetTraduction(service, "Phone"):</strong> <a class="link" href="tel:+5491112345678">+5491112345678</a></p>
+                        <p><strong>Email:</strong> <a class="link" href="mailto:contacto@agrominds.com.ar">contacto@agrominds.com.ar</a></p>
+                        <p><strong>@translator.GetTraduction(service, "Schedule"):</strong> Lun - Vie9:00 -18:00</p>
+                    </div>
+                    <div class="col" style="flex:1; min-width:220px;">
+                        <h3>@translator.GetTraduction(service, "SupportSales")</h3>
+                        <p><strong>@translator.GetTraduction(service, "Support"):</strong> <a class="link" href="mailto:soporte@agrominds.com.ar">soporte@agrominds.com.ar</a></p>
+                        <p><strong>@translator.GetTraduction(service, "Sales"):</strong> <a class="link" href="mailto:ventas@agrominds.com.ar">ventas@agrominds.com.ar</a></p>
+                        <p style="margin:8px 0 0;">@translator.GetTraduction(service, "FollowUs")</p>
+                        <p style="margin:6px 0 0;">
+                            <a class="link" href="#" style="margin-right:8px;">Twitter</a>
+                            <a class="link" href="#" style="margin-right:8px;">LinkedIn</a>
+                            <a class="link" href="#">Instagram</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <form method="post" action="@Url.Action("SendContact","Home")">
+                    <label for="name">@translator.GetTraduction(service, "Name")</label>
+                    <input type="text" id="name" name="name" required />
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required />
+                    <label for="message">@translator.GetTraduction(service, "Message")</label>
+                    <textarea id="message" name="message" rows="6" required></textarea>
+                    <button type="submit">@translator.GetTraduction(service, "Send")</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+<footer style="background-color:#2E7D32; color:white; padding:10px; text-align:center;">©2026 AgroMinds — @translator.GetTraduction(service, "AllRightsReserved")</footer>
 </body>
 </html>

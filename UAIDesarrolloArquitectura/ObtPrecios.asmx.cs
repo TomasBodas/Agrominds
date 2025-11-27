@@ -19,7 +19,7 @@ namespace UAIDesarrolloArquitectura
         [WebMethod]
         public decimal[] ObtenerPrecios()
         {
-            decimal[] precios = { 7600, 16500, 23600 };
+            decimal[] precios = { 1500, 3000, 5000 };
             return precios;
         }
     }

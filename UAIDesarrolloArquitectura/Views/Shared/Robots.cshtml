@@ -29,18 +29,18 @@
 		.sidebar a:hover, .sidebar a.active { background:#c8e6c9; }
 		.content { flex:1; padding:32px 48px 40px; }
 		.robots-wrapper { max-width:1180px; margin:0 auto; }
-		.filter-bar { display:flex; align-items:center; gap:12px; justify-content:space-between;  padding-bottom:10px; }
+		.filter-bar { display:flex; align-items:center; gap:12px; justify-content:space-between; padding-bottom:10px; }
 		.filter-group { display:flex; align-items:center; gap:12px; }
 		.filter-bar label { font-weight:600; color:#1b5e20; }
 		.filter-bar select { padding:6px 10px; border:1px solid #cfe0cf; border-radius:8px; }
 		.robot-list { display:flex; flex-direction:column; gap:20px; }
-		.robot-item { background:#ffffff; border:1px solid #d8e2d8; border-radius:20px; padding:20px 28px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 10px rgba(46,125,50,0.12); animation:fadeIn .5s ease; transition:box-shadow .25s, transform .15s; }
-		.robot-item:hover { box-shadow:0 6px 16px rgba(46,125,50,0.18); transform:translateY(-2px); }
+		.robot-item { background:#ffffff; border:1px solid #d8e2d8; border-radius:20px; padding:20px 28px; display:flex; justify-content:space-between; align-items:center; box-shadow:04px 10px rgba(46,125,50,0.12); animation:fadeIn .5s ease; transition:box-shadow .25s, transform .15s; }
+		.robot-item:hover { box-shadow:06px 16px rgba(46,125,50,0.18); transform:translateY(-2px); }
 		.dark .robot-item { background:#2b2b2b; border-color:#444; }
 		@@keyframes fadeIn { from { opacity:0; transform:translateY(12px);} to { opacity:1; transform:translateY(0);} }
 		.robot-info h3 { margin:0 0 6px 0; font-size:21px; font-weight:700; color:#2E7D32; letter-spacing:.4px; }
 		.robot-info p { margin:2px 0; font-size:14px; color:#1b5e20; }
-		.status-pill { display:inline-block; padding:5px 12px; font-size:12px; font-weight:600; border-radius:16px; background:#e8f5e9; color:#1b5e20; box-shadow:0 0 1px rgba(46,125,50,.12); }
+		.status-pill { display:inline-block; padding:5px 12px; font-size:12px; font-weight:600; border-radius:16px; background:#e8f5e9; color:#1b5e20; box-shadow:001px rgba(46,125,50,.12); }
 		.status-activo { background:#e3f2fd; color:#1565c0; }
 		.status-mantenimiento { background:#fff8e1; color:#ff8f00; }
 		.status-apagado { background:#ffebee; color:#c62828; }
@@ -77,145 +77,196 @@
 	</style>
 </head>
 <body>
-	<nav class="barra">
-		@if (Services.SessionManager.IsLogged()) {
-			<div id="opciones" class="opciones">
-				<a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service,"Logout")</a>
-				<a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service,"Log")</a>
-				<a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service,"ManageUser")</a>
-				<a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service,"Restoredb")</a>
-				<a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service,"ManageLanguage")</a>
-				<a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service,"CreateProfile")</a>
-				<a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service,"AssignProfile")</a>
-				<script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
-			</div>
-			<div class="opciones"><p style="color:white;">@translator.GetTraduction(service,"Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
-		} else {
-			<a href="@Url.Action("Login","Login")">@translator.GetTraduction(service,"Login")</a>
-			<a href="@Url.Action("Register","Register")">@translator.GetTraduction(service,"Register")</a>
-		}
-		<form>
-			<select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages()){ if (service.SelectedLanguage.Id==l.Id){<option value="@l.Id" selected>@translator.GetTraduction(service,l.Name)</option>} else {<option value="@l.Id">@translator.GetTraduction(service,l.Name)</option>} }</select>
-		</form>
-	</nav>
-	<div class="layout">
- <aside class="sidebar">
- <a href="@Url.Action("Robots","Home")" class="active">@translator.GetTraduction(service,"RobotsManagement")</a>
- <a href="@Url.Action("Mantenimientos","Home")">@translator.GetTraduction(service,"Maintenance")</a>
- <a href="@Url.Action("Telemetria","Home")">@translator.GetTraduction(service,"Telemetry")</a>
- <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service,"Contact")</a>
- </aside>
-		<main class="content">
-			<div class="robots-wrapper">
-			@if (Model == null || Model.Count ==0) {
-				<div class="empty-msg">@translator.GetTraduction(service,"NoRobots")</div>
-			} else {
-				<div class="filter-bar">
-					<div class="filter-group">
-						<label for="estadoFilter">@translator.GetTraduction(service,"FilterByState"):</label>
-						<select id="estadoFilter">
-							<option value="all">@translator.GetTraduction(service,"All")</option>
-							@foreach (var kv in estados)
-							{
-								<option value="@kv.Key">@translator.GetTraduction(service, kv.Value)</option>
-							}
-						</select>
-					</div>
-					<button type="button" class="btn" onclick="openRobotCreateModal()">@translator.GetTraduction(service,"CreateRobot")</button>
-				</div>
-				<div class="robot-list">
-					@foreach (var r in Model) {
-						var bateriaPct = r.Bateria <0 ?0 : (r.Bateria >100 ?100 : r.Bateria);
-						string estadoNombreRaw = estados.ContainsKey(r.IdEstadoRobot) ? estados[r.IdEstadoRobot] : r.IdEstadoRobot.ToString();
-						string estadoNombreTraducido = translator.GetTraduction(service, estadoNombreRaw);
-						string estadoClass = estadoNombreRaw.ToLower().Replace(" ","-");
-						bool activo = r.IdEstadoRobot ==1; // ahora1=active
-						var botonPowerTexto = activo ? translator.GetTraduction(service,"Deactivate") : translator.GetTraduction(service,"Activate");
-						var siguienteEstadoPower = activo ?3 :1; // toggle1<->3
-						<div class="robot-item" data-id="@r.Id" data-state="@r.IdEstadoRobot">
-							<div class="robot-info">
-								<h3>@r.Nombre</h3>
-								<p><strong>@translator.GetTraduction(service, "State"):</strong> <span class="status-pill status-@estadoClass">@estadoNombreTraducido</span></p>
-								<p><strong>@translator.GetTraduction(service, "Battery"):</strong></p>
-								<div class="battery-wrap @(bateriaPct<=15?"battery-low":"")">
-									<div class="battery-bar"><div class="battery-fill" style="width:@bateriaPct%;"></div></div>
-									<span class="battery-label">@bateriaPct%</span>
-								</div>
-							</div>
-							<div class="robot-actions">
-								<button type="button" class="btn @(activo?"btn-power-activo":"btn-power-inactivo") btn-power" data-id="@r.Id" data-next="@siguienteEstadoPower">@botonPowerTexto</button>
-								<button type="button" class="btn btn-config" data-id="@r.Id">@translator.GetTraduction(service,"Configure")</button>
-							</div>
-						</div>
-					}
-				</div>
-			}
-			</div>
-		</main>
-	</div>
-	<!-- Modal crear robot -->
-	<div id="robotCreateModal" class="modal-backdrop">
-		<div class="modal" role="dialog" aria-modal="true">
-			<header>@translator.GetTraduction(service,"CreateRobot")</header>
-			<div class="body">
-				<div class="fld">
-					<label for="cr-nombre">@translator.GetTraduction(service,"Name")</label>
-					<input id="cr-nombre" type="text" />
-				</div>
-				<div class="fld">
-					<label for="cr-numero">@translator.GetTraduction(service,"SerialNumber")</label>
-					<input id="cr-numero" type="text" />
-				</div>
-				<div class="fld">
-					<label for="cr-bateria">@translator.GetTraduction(service,"Battery") (%)</label>
-					<input id="cr-bateria" type="number" min="0" max="100" value="100" />
-				</div>
-				<div class="fld">
-					<label for="cr-estado">@translator.GetTraduction(service,"State")</label>
-					<select id="cr-estado">
-						@foreach (var kv in estados){<option value="@kv.Key">@translator.GetTraduction(service, kv.Value)</option>}
-					</select>
-				</div>
-				<div class="fld">
-					<label for="cr-lat">@translator.GetTraduction(service,"Latitude")</label>
-					<input id="cr-lat" type="text" />
-				</div>
-				<div class="fld">
-					<label for="cr-lon">@translator.GetTraduction(service,"Longitude")</label>
-					<input id="cr-lon" type="text" />
-				</div>
-			</div>
-			<div class="actions">
-				<button class="btn btn-secondary" type="button" onclick="closeRobotCreateModal()">@translator.GetTraduction(service,"Cancel")</button>
-				<button class="btn" type="button" onclick="saveRobotCreate()">@translator.GetTraduction(service,"Save")</button>
-			</div>
-		</div>
-	</div>
-	<footer>©2026 AgroMinds — Tecnología agrícola inteligente. Todos los derechos reservados.</footer>
-	<script src="~/Scripts/scriptIdioma.js"></script>
-	<script>
-	(function(){
-		function post(url,data){return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(r=>r.json());}
-		document.querySelectorAll('.btn-config').forEach(b=>b.addEventListener('click',function(){var id=this.getAttribute('data-id');window.location='/Robot/Details/'+id;}));
-		document.querySelectorAll('.btn-power').forEach(b=>b.addEventListener('click',function(){var id=this.getAttribute('data-id');var next=this.getAttribute('data-next');post('/Robot/ChangeState',{id:parseInt(id),newState:parseInt(next)}).then(resp=>{if(resp.success){location.reload();}else{alert(resp.error||'Error');}}).catch(()=>alert('Error de conexión'));}));
-		var sel=document.getElementById('estadoFilter');
-		if(sel){ sel.addEventListener('change', function(){ var v=this.value; var items=document.querySelectorAll('.robot-item'); items.forEach(function(it){ var st=it.getAttribute('data-state'); if(v==='all' || v===st){ it.style.display='flex'; } else { it.style.display='none'; } }); }); }
-		window.openRobotCreateModal=function(){ document.getElementById('robotCreateModal').style.display='flex'; };
-		window.closeRobotCreateModal=function(){ document.getElementById('robotCreateModal').style.display='none'; };
-		window.saveRobotCreate=function(){
-			var nombre=document.getElementById('cr-nombre').value.trim();
-			var numero=document.getElementById('cr-numero').value.trim();
-			var bateria=parseInt(document.getElementById('cr-bateria').value);
-			var estado=parseInt(document.getElementById('cr-estado').value);
-			var latStr=document.getElementById('cr-lat').value.trim();
-			var lonStr=document.getElementById('cr-lon').value.trim();
-			if(!nombre||!numero){ alert('Nombre y Número de serie requeridos'); return; }
-			if(isNaN(bateria)||bateria<0||bateria>100){ alert('Batería inválida'); return; }
-			var lat = latStr? parseFloat(latStr): null;
-			var lon = lonStr? parseFloat(lonStr): null;
-			var body={ Nombre:nombre, NumeroSerie:numero, Bateria:bateria, IdEstadoRobot:estado, Latitud:lat, Longitud:lon };
-			post('/Robot/Create', body).then(function(resp){ if(resp.success){ location.reload(); } else { alert(resp.error||'Error'); } });
-		};
-	})();
-	</script>
-</body></html></body></html>
+    <nav class="barra">
+        @if (Services.SessionManager.IsLogged())
+        {
+            <div id="opciones" class="opciones">
+                <a href="@Url.Action("Logout","Home")">@translator.GetTraduction(service, "Logout")</a>
+                <a href="#" onclick="openChangePasswordModal()">@translator.GetTraduction(service, "ChangePassword")</a>
+                <a style="display:none;" id="bitacora" href="@Url.Action("Bitacora","Bitacora")">@translator.GetTraduction(service, "Log")</a>
+                <a style="display:none;" id="abmusuarios" href="@Url.Action("ABMUsuarios","ABM")">@translator.GetTraduction(service, "ManageUser")</a>
+                <a style="display:none;" id="restore" href="@Url.Action("BackupRestore","Backup")">@translator.GetTraduction(service, "Restoredb")</a>
+                <a style="display:none;" id="1001" href="@Url.Action("ABMIdioma","Idioma")">@translator.GetTraduction(service, "ManageLanguage")</a>
+                <a style="display:none;" id="1002" href="@Url.Action("CrearPerfiles","CrearPerfiles")">@translator.GetTraduction(service, "CreateProfile")</a>
+                <a style="display:none;" id="1003" href="@Url.Action("AsignarPerfil","AsignarPerfil")">@translator.GetTraduction(service, "AssignProfile")</a>
+                <script type="text/javascript">@foreach (string permission in Services.SessionManager.GetInstance.User.permissionList){<text>document.getElementById('@permission').style.display='block';</text>}</script>
+            </div>
+            <div class="opciones"><p style="color:white;">@translator.GetTraduction(service, "Welcome"), @Services.SessionManager.GetInstance.User.Name</p></div>
+        }
+        else
+        {
+            <a href="@Url.Action("Login","Login")">@translator.GetTraduction(service, "Login")</a>
+            <a href="@Url.Action("Register","Register")">@translator.GetTraduction(service, "Register")</a>
+        }
+        <form>
+            <select id="option" onchange="enviarValor()">@foreach (Services.Idioma.Language l in service.GetLanguages())
+            {
+                if (service.SelectedLanguage.Id == l.Id)
+                {<option value="@l.Id" selected>@translator.GetTraduction(service, l.Name)</option>}
+            else
+            {<option value="@l.Id">@translator.GetTraduction(service, l.Name)</option>}
+    }</select>
+        </form>
+    </nav>
+    <div class="layout">
+        <aside class="sidebar">
+            <a href="@Url.Action("Robots","Home")" class="active">@translator.GetTraduction(service, "RobotsManagement")</a>
+            <a href="@Url.Action("Mantenimientos","Home")">@translator.GetTraduction(service, "Maintenance")</a>
+            <a href="@Url.Action("Telemetria","Home")">@translator.GetTraduction(service, "Telemetry")</a>
+            <a href="@Url.Action("ContactUs","Home")">@translator.GetTraduction(service, "Contact")</a>
+        </aside>
+        <main class="content">
+            <div class="robots-wrapper">
+                @if (Model == null || Model.Count == 0)
+                {
+                    <div class="empty-msg">@translator.GetTraduction(service, "NoRobots")</div>
+                }
+                else
+                {
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label for="estadoFilter">@translator.GetTraduction(service, "FilterByState"):</label>
+                            <select id="estadoFilter">
+                                <option value="all">@translator.GetTraduction(service, "All")</option>
+                                @foreach (var kv in estados)
+                                {
+                                    <option value="@kv.Key">@translator.GetTraduction(service, kv.Value)</option>
+                                }
+                            </select>
+                        </div>
+                        <button type="button" class="btn" onclick="openRobotCreateModal()">@translator.GetTraduction(service, "CreateRobot")</button>
+                    </div>
+                    <div class="robot-list">
+                        @foreach (var r in Model)
+                        {
+                            var bateriaPct = r.Bateria < 0 ? 0 : (r.Bateria > 100 ? 100 : r.Bateria);
+                            string estadoNombreRaw = estados.ContainsKey(r.IdEstadoRobot) ? estados[r.IdEstadoRobot] : r.IdEstadoRobot.ToString();
+                            string estadoNombreTraducido = translator.GetTraduction(service, estadoNombreRaw);
+                            string estadoClass = estadoNombreRaw.ToLower().Replace(" ", "-");
+                            bool activo = r.IdEstadoRobot == 1; // ahora1=active
+                            var botonPowerTexto = activo ? translator.GetTraduction(service, "Deactivate") : translator.GetTraduction(service, "Activate");
+                            var siguienteEstadoPower = activo ? 3 : 1; // toggle1<->3
+                            <div class="robot-item" data-id="@r.Id" data-state="@r.IdEstadoRobot">
+                                <div class="robot-info">
+                                    <h3>@r.Nombre</h3>
+                                    <p><strong>@translator.GetTraduction(service, "State"):</strong> <span class="status-pill status-@estadoClass">@estadoNombreTraducido</span></p>
+                                    <p><strong>@translator.GetTraduction(service, "Battery"):</strong></p>
+                                    <div class="battery-wrap @(bateriaPct<=15?"battery-low":"")">
+                                        <div class="battery-bar"><div class="battery-fill" style="width:@bateriaPct%;"></div></div>
+                                        <span class="battery-label">@bateriaPct%</span>
+                                    </div>
+                                </div>
+                                <div class="robot-actions">
+                                    <button type="button" class="btn @(activo?"btn-power-activo":"btn-power-inactivo") btn-power" data-id="@r.Id" data-next="@siguienteEstadoPower">@botonPowerTexto</button>
+                                    <button type="button" class="btn btn-config" data-id="@r.Id">@translator.GetTraduction(service, "Configure")</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </main>
+    </div>
+    <!-- Modal crear robot -->
+    <div id="robotCreateModal" class="modal-backdrop">
+        <div class="modal" role="dialog" aria-modal="true">
+            <header>@translator.GetTraduction(service, "CreateRobot")</header>
+            <div class="body">
+                <div class="fld">
+                    <label for="cr-nombre">@translator.GetTraduction(service, "Name")</label>
+                    <input id="cr-nombre" type="text" />
+                </div>
+                <div class="fld">
+                    <label for="cr-numero">@translator.GetTraduction(service, "SerialNumber")</label>
+                    <input id="cr-numero" type="text" />
+                </div>
+                <div class="fld">
+                    <label for="cr-bateria">@translator.GetTraduction(service, "Battery") (%)</label>
+                    <input id="cr-bateria" type="number" min="0" max="100" value="100" />
+                </div>
+                <div class="fld">
+                    <label for="cr-estado">@translator.GetTraduction(service, "State")</label>
+                    <select id="cr-estado">
+                        @foreach (var kv in estados)
+                        {
+                            <option value="@kv.Key">@translator.GetTraduction(service, kv.Value)</option>
+}
+                    </select>
+                </div>
+                <div class="fld">
+                    <label for="cr-lat">@translator.GetTraduction(service, "Latitude")</label>
+                    <input id="cr-lat" type="text" />
+                </div>
+                <div class="fld">
+                    <label for="cr-lon">@translator.GetTraduction(service, "Longitude")</label>
+                    <input id="cr-lon" type="text" />
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" type="button" onclick="closeRobotCreateModal()">@translator.GetTraduction(service, "Cancel")</button>
+                <button class="btn" type="button" onclick="saveRobotCreate()">@translator.GetTraduction(service, "Save")</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal cambiar contraseña -->
+    <div id="changePasswordModal" class="modal-backdrop">
+        <div class="modal" role="dialog" aria-modal="true">
+            <header>@translator.GetTraduction(service, "ChangePassword")</header>
+            <div class="body">
+                <div class="fld">
+                    <label for="cp-current">@translator.GetTraduction(service, "CurrentPassword")</label>
+                    <input id="cp-current" type="password" />
+                </div>
+                <div class="fld">
+                    <label for="cp-new">@translator.GetTraduction(service, "NewPassword")</label>
+                    <input id="cp-new" type="password" />
+                </div>
+                <div class="fld">
+                    <label for="cp-confirm">@translator.GetTraduction(service, "ConfirmPassword")</label>
+                    <input id="cp-confirm" type="password" />
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" type="button" onclick="closeChangePasswordModal()">@translator.GetTraduction(service, "Cancel")</button>
+                <button class="btn" type="button" onclick="saveChangePassword()">@translator.GetTraduction(service, "Save")</button>
+            </div>
+        </div>
+    </div>
+    <footer style="background-color:#2E7D32; color:white; padding:10px; text-align:center;">©2026 AgroMinds — @translator.GetTraduction(service, "AllRightsReserved")</footer>
+    <script src="~/Scripts/scriptIdioma.js"></script>
+    <script>
+        (function () {
+            function post(url, data) { return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(r => r.json()); }
+            document.querySelectorAll('.btn-config').forEach(b => b.addEventListener('click', function () { var id = this.getAttribute('data-id'); window.location = '/Robot/Details/' + id; }));
+            document.querySelectorAll('.btn-power').forEach(b => b.addEventListener('click', function () { var id = this.getAttribute('data-id'); var next = this.getAttribute('data-next'); post('/Robot/ChangeState', { id: parseInt(id), newState: parseInt(next) }).then(resp => { if (resp.success) { location.reload(); } else { alert(resp.error || 'Error'); } }).catch(() => alert('Error de conexión')); }));
+            var sel = document.getElementById('estadoFilter');
+            if (sel) { sel.addEventListener('change', function () { var v = this.value; var items = document.querySelectorAll('.robot-item'); items.forEach(function (it) { var st = it.getAttribute('data-state'); if (v === 'all' || v === st) { it.style.display = 'flex'; } else { it.style.display = 'none'; } }); }); }
+            window.openRobotCreateModal = function () { document.getElementById('robotCreateModal').style.display = 'flex'; };
+            window.closeRobotCreateModal = function () { document.getElementById('robotCreateModal').style.display = 'none'; };
+            window.saveRobotCreate = function () {
+                var nombre = document.getElementById('cr-nombre').value.trim();
+                var numero = document.getElementById('cr-numero').value.trim();
+                var bateria = parseInt(document.getElementById('cr-bateria').value);
+                var estado = parseInt(document.getElementById('cr-estado').value);
+                var latStr = document.getElementById('cr-lat').value.trim();
+                var lonStr = document.getElementById('cr-lon').value.trim();
+                if (!nombre || !numero) { alert('Nombre y Número de serie requeridos'); return; }
+                if (isNaN(bateria) || bateria < 0 || bateria > 100) { alert('Batería inválida'); return; }
+                var lat = latStr ? parseFloat(latStr) : null;
+                var lon = lonStr ? parseFloat(lonStr) : null;
+                var body = { Nombre: nombre, NumeroSerie: numero, Bateria: bateria, IdEstadoRobot: estado, Latitud: lat, Longitud: lon };
+                post('/Robot/Create', body).then(function (resp) { if (resp.success) { location.reload(); } else { alert(resp.error || 'Error'); } });
+            };
+            window.openChangePasswordModal = function () { document.getElementById('changePasswordModal').style.display = 'flex'; };
+            window.closeChangePasswordModal = function () { document.getElementById('changePasswordModal').style.display = 'none'; };
+            window.saveChangePassword = function () {
+                var cur = document.getElementById('cp-current').value;
+                var nw = document.getElementById('cp-new').value;
+                var cf = document.getElementById('cp-confirm').value;
+                if (!nw || nw.length < 6) { alert('Contraseña nueva muy corta'); return; }
+                if (nw !== cf) { alert('Las contraseñas no coinciden'); return; }
+                post('/Login/ChangePassword', { currentPassword: cur, newPassword: nw }).then(function (resp) { if (resp.success) { alert('Contraseña cambiada'); closeChangePasswordModal(); } else { alert(resp.error || 'Error'); } });
+            };
+        })();
+    </script>
+</body></html>
