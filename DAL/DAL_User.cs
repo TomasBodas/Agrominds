@@ -30,19 +30,9 @@ namespace DAL
                         command.Parameters.AddWithValue("@DNI", DNI);
                         command.Parameters.AddWithValue("@Email", Email);
                         command.Parameters.AddWithValue("@Contraseña", HashPassword);
-                        command.Parameters.AddWithValue("@idioma", 1);
-                        if (Name == "webmaster" || Name == "admin")
-                        {
-                            if (Name == "webmaster")
-                            {
-                                command.Parameters.AddWithValue("@IdPerfil", 2);
-                            }
-                            if (Name == "admin")
-                            {
-                                command.Parameters.AddWithValue("@IdPerfil", 1);
-                            }
-                        }
-                        else command.Parameters.AddWithValue("@IdPerfil", 3);
+                        command.Parameters.AddWithValue("@idioma",1);
+                        // Forzar IdPerfil =6 para nuevos usuarios
+                        command.Parameters.AddWithValue("@IdPerfil",6);
                         command.ExecuteNonQuery();
                     }
                 }
