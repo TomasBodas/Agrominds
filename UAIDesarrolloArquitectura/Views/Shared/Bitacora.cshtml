@@ -174,17 +174,18 @@
         @using (Html.BeginForm("Bitacora", "Bitacora", FormMethod.Post, new { id = "formularioFiltros" }))
         {
             <div class="contenedor-filtros">
-                @Html.Label(translator.GetTraduction(service, "Since"))<input type="date" id="fechaInicio" name="fechaInicio" />
-                @Html.Label(translator.GetTraduction(service, "Until"))<input type="date" id="fechaFinal" name="fechaFinal" />
-                @Html.Label(translator.GetTraduction(service, "Module"))<input type="text" id="modulo" name="modulo" />
+                @Html.Label(translator.GetTraduction(service, "Since"))<input type="date" id="fechaInicio" name="Fechainicio" />
+                @Html.Label(translator.GetTraduction(service, "Until"))<input type="date" id="fechaFinal" name="Fechafinal" />
+                @Html.Label(translator.GetTraduction(service, "Module"))<input type="text" id="modulo" name="Modulo" />
                 <button type="submit" class="boton">@translator.GetTraduction(service, "FilterText")</button>
-                @* Export button at same level as filters *@
-                @using (Html.BeginForm("ExportXML", "Bitacora", FormMethod.Post, new { @class = "export-form" }))
-                {
-                    <button type="submit" class="boton">@translator.GetTraduction(service, "Export")</button>
-                }
             </div>
         }
+        <div class="contenedor-filtros" style="margin-top:-10px;">
+            @using (Html.BeginForm("ExportXML", "Bitacora", FormMethod.Post, new { id = "exportForm" }))
+            {
+                <button type="submit" class="boton">@translator.GetTraduction(service, "Export")</button>
+            }
+        </div>
         <table>
             <thead>
                 <tr>
