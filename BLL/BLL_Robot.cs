@@ -271,5 +271,10 @@ namespace BLL
 			var uid = SessionManager.GetInstance.User.id;
 			return _dal.GetRobotsByUser(uid);
 		}
+
+		public List<Robot> GetRobotsForUser(int userId)
+		{
+			return _dal.GetRobotsByUser(userId);
+		}
 	}
 }

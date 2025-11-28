@@ -186,7 +186,7 @@
             </div>
         </section>
         <section style="margin-top:20px;">
-            <form method="post" action="@Url.Action("SendContact","Home")">
+            <form id="contact-form" method="post" action="@Url.Action("SendContact","Home")">
                 <label for="name">@translator.GetTraduction(service, "Name")</label><br />
                 <input type="text" id="name" name="name" style="width:100%;padding:8px;margin:6px 0;" required />
                 <label for="email">Email</label><br />
@@ -242,6 +242,19 @@
                 if (acceptBtn) acceptBtn.addEventListener('click', function () { setConsent('accepted'); hideModal(); });
                 if (declineBtn) declineBtn.addEventListener('click', function () { setConsent('declined'); hideModal(); });
             });
+        })();
+    </script>
+    <script>
+        (function(){
+            var f=document.getElementById('contact-form');
+            if(f){
+                f.addEventListener('submit', function(e){
+                    e.preventDefault();
+                    alert('Mensaje enviado');
+                    try{ f.reset(); }catch(_){ }
+                    return false;
+                });
+            }
         })();
     </script>
 </body>

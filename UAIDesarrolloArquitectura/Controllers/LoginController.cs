@@ -199,6 +199,7 @@ namespace UAIDesarrolloArquitectura.Controllers
                     bool sent = false;
                     try { sent = _emailService.SendPasswordChangedAsync(user.Email, user.Name).Result; } catch { }
                     try { _dalUser.EventLog(user.id, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "Login", sent ? "Email cambio de contraseña enviado" : "Email cambio de contraseña falló"); } catch { }
+                    try { new BLL_CheckDigitsManager().SetCheckDigits(); } catch { }
                     return Json(new { success = true });
                 }
             }

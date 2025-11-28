@@ -34,13 +34,13 @@
 		.filter-bar label { font-weight:600; color:#1b5e20; }
 		.filter-bar select { padding:6px 10px; border:1px solid #cfe0cf; border-radius:8px; }
 		.robot-list { display:flex; flex-direction:column; gap:20px; }
-		.robot-item { background:#ffffff; border:1px solid #d8e2d8; border-radius:20px; padding:20px 28px; display:flex; justify-content:space-between; align-items:center; box-shadow:04px 10px rgba(46,125,50,0.12); animation:fadeIn .5s ease; transition:box-shadow .25s, transform .15s; }
-		.robot-item:hover { box-shadow:06px 16px rgba(46,125,50,0.18); transform:translateY(-2px); }
+		.robot-item { background:#ffffff; border:1px solid #d8e2d8; border-radius:20px; padding:20px 28px; display:flex; justify-content:space-between; align-items:center; box-shadow:04px 10px rgba(0,125,50,0.12); animation:fadeIn .5s ease; transition:box-shadow .25s, transform .15s; }
+		.robot-item:hover { box-shadow:06px 16px rgba(0,125,50,0.18); transform:translateY(-2px); }
 		.dark .robot-item { background:#2b2b2b; border-color:#444; }
 		@@keyframes fadeIn { from { opacity:0; transform:translateY(12px);} to { opacity:1; transform:translateY(0);} }
 		.robot-info h3 { margin:0 0 6px 0; font-size:21px; font-weight:700; color:#2E7D32; letter-spacing:.4px; }
 		.robot-info p { margin:2px 0; font-size:14px; color:#1b5e20; }
-		.status-pill { display:inline-block; padding:5px 12px; font-size:12px; font-weight:600; border-radius:16px; background:#e8f5e9; color:#1b5e20; box-shadow:001px rgba(46,125,50,.12); }
+		.status-pill { display:inline-block; padding:5px 12px; font-size:12px; font-weight:600; border-radius:16px; background:#e8f5e9; color:#1b5e20; box-shadow:001px rgba(0,125,50,.12); }
 		.status-activo { background:#e3f2fd; color:#1565c0; }
 		.status-mantenimiento { background:#fff8e1; color:#ff8f00; }
 		.status-apagado { background:#ffebee; color:#c62828; }
@@ -62,7 +62,6 @@
 		.btn-config:hover { background:linear-gradient(135deg,#dfe4e6,#c5ced2); }
 		.empty-msg { background:#fff; border:1px dashed #cfe0cf; padding:48px 32px; border-radius:24px; font-weight:600; color:#1b5e20; text-align:center; }
 		footer { background:#2E7D32; color:#fff; padding:14px; text-align:center; }
-		/* Modal básico reutilizable */
 		.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;}
 		.modal{background:#fff;border-radius:12px;max-width:560px;width:92%;box-shadow:0 10px 30px rgba(0,0,0,.25);} 
 		.modal header{padding:14px 18px;border-bottom:1px solid #e5e5e5;font-weight:700;color:#2E7D32;}
@@ -117,35 +116,35 @@
         </aside>
         <main class="content">
             <div class="robots-wrapper">
-                @if (Model == null || Model.Count == 0)
-                {
-                    <div class="empty-msg">@translator.GetTraduction(service, "NoRobots")</div>
-                }
-                else
-                {
-                    <div class="filter-bar">
-                        <div class="filter-group">
-                            <label for="estadoFilter">@translator.GetTraduction(service, "FilterByState"):</label>
-                            <select id="estadoFilter">
-                                <option value="all">@translator.GetTraduction(service, "All")</option>
-                                @foreach (var kv in estados)
-                                {
-                                    <option value="@kv.Key">@translator.GetTraduction(service, kv.Value)</option>
-                                }
-                            </select>
-                        </div>
-                        <button type="button" class="btn" onclick="openRobotCreateModal()">@translator.GetTraduction(service, "CreateRobot")</button>
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label for="estadoFilter">@translator.GetTraduction(service, "FilterByState"):</label>
+                        <select id="estadoFilter">
+                            <option value="all">@translator.GetTraduction(service, "All")</option>
+                            @foreach (var kv in estados)
+                            {
+                                <option value="@kv.Key">@translator.GetTraduction(service, kv.Value)</option>
+                            }
+                        </select>
                     </div>
-                    <div class="robot-list">
-                        @foreach (var r in Model)
+                    <button type="button" class="btn" onclick="openRobotCreateModal()">@translator.GetTraduction(service, "CreateRobot")</button>
+                </div>
+                <div class="robot-list">
+                    @if (Model == null || Model.Count ==0)
+                    {
+                        <div class="empty-msg">@translator.GetTraduction(service, "NoRobots")</div>
+                    }
+                    else
+                    {
+                        foreach (var r in Model)
                         {
-                            var bateriaPct = r.Bateria < 0 ? 0 : (r.Bateria > 100 ? 100 : r.Bateria);
+                            var bateriaPct = r.Bateria <0 ?0 : (r.Bateria >100 ?100 : r.Bateria);
                             string estadoNombreRaw = estados.ContainsKey(r.IdEstadoRobot) ? estados[r.IdEstadoRobot] : r.IdEstadoRobot.ToString();
                             string estadoNombreTraducido = translator.GetTraduction(service, estadoNombreRaw);
                             string estadoClass = estadoNombreRaw.ToLower().Replace(" ", "-");
-                            bool activo = r.IdEstadoRobot == 1; // ahora1=active
+                            bool activo = r.IdEstadoRobot ==1; // ahora1=active
                             var botonPowerTexto = activo ? translator.GetTraduction(service, "Deactivate") : translator.GetTraduction(service, "Activate");
-                            var siguienteEstadoPower = activo ? 3 : 1; // toggle1<->3
+                            var siguienteEstadoPower = activo ?3 :1; // toggle1<->3
                             <div class="robot-item" data-id="@r.Id" data-state="@r.IdEstadoRobot">
                                 <div class="robot-info">
                                     <h3>@r.Nombre</h3>
@@ -162,8 +161,8 @@
                                 </div>
                             </div>
                         }
-                    </div>
-                }
+                    }
+                </div>
             </div>
         </main>
     </div>

@@ -40,8 +40,8 @@ namespace UAIDesarrolloArquitectura.Controllers
         public ActionResult Robots()
         {
             var guard = RequireLogin(); if (guard != null) return guard;
-            // Obtener robots y estados vía BLL (ya no directamente desde DAL)
-            IList<Robot> robots = _bllRobot.GetRobotsForCurrentUser();
+            int uid = SessionManager.GetInstance.User.id;
+            IList<Robot> robots = _bllRobot.GetRobotsForUser(uid);
             ViewBag.EstadosRobot = _bllRobot.GetEstadosRobot();
             return View("Robots", robots);
         }
@@ -69,15 +69,9 @@ namespace UAIDesarrolloArquitectura.Controllers
 
         public ActionResult Plans()
         {
-            // Crear una instancia del cliente del servicio web
-            var servicioPrecios = new ObtPrecios(); // Asegúrate de que 'ObtPrecios' sea el nombre correcto del proxy
-
-            // Llamar al método del WebService para obtener los precios
-            var precios = servicioPrecios.ObtenerPrecios(); // Llama al método directamente
-
-            // Pasar los precios a la vista usando ViewBag
+            var servicioPrecios = new ObtPrecios();
+            var precios = servicioPrecios.ObtenerPrecios();
             ViewBag.Precios = precios;
-
             return View("Plans");
         }
 
@@ -104,8 +98,9 @@ namespace UAIDesarrolloArquitectura.Controllers
         public ActionResult Mantenimientos()
         {
             var guard = RequireLogin(); if (guard != null) return guard;
+            int uid = SessionManager.GetInstance.User.id;
             var dalRobot = new DAL_Robot();
-            var dalList = dalRobot.GetAllRobots();
+            var dalList = dalRobot.GetRobotsByUser(uid);
             var mantenimientosPorRobot = new Dictionary<int, IList<MantenimientoRobot>>();
             foreach (var r in dalList)
             {
@@ -121,8 +116,9 @@ namespace UAIDesarrolloArquitectura.Controllers
         public ActionResult Telemetria()
         {
             var guard = RequireLogin(); if (guard != null) return guard;
+            int uid = SessionManager.GetInstance.User.id;
             var dalRobot = new DAL_Robot();
-            var robots = dalRobot.GetAllRobots();
+            var robots = dalRobot.GetRobotsByUser(uid);
             var telemetriaPorRobot = new Dictionary<int, IList<TelemetriaRobot>>();
             foreach (var r in robots)
             {

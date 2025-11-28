@@ -186,8 +186,50 @@ textarea#task-params { font-family: Consolas, monospace; white-space: pre; }
  </div>
  </div>
  </div>
- </main>
+
+ <!-- Modal editar robot -->
+ <div id="robotEditModal" class="modal-backdrop" style="display:none;">
+ 	<div class="modal" role="dialog" aria-modal="true">
+ 		<header>@translator.GetTraduction(service,"Edit")</header>
+ 		<div class="body">
+ 			<input type="hidden" id="robot-id" value="@Model.Id" />
+ 			<div class="fld">
+ 				<label for="robot-nombre">@translator.GetTraduction(service,"Name")</label>
+ 				<input id="robot-nombre" type="text" value="@Model.Nombre" />
+ 			</div>
+ 			<div class="fld">
+ 				<label for="robot-numero">@translator.GetTraduction(service,"SerialNumber")</label>
+ 				<input id="robot-numero" type="text" value="@Model.NumeroSerie" />
+ 			</div>
+ 			<div class="fld">
+ 				<label for="robot-bateria">@translator.GetTraduction(service,"Battery") (%)</label>
+ 				<input id="robot-bateria" type="number" min="0" max="100" value="@Model.Bateria" />
+ 			</div>
+ 			<div class="fld">
+ 				<label for="robot-estado">@translator.GetTraduction(service,"State")</label>
+ 				<select id="robot-estado">
+ 					@foreach (var kv in estados)
+ 					{
+ 						<option value="@kv.Key" @(Model.IdEstadoRobot==kv.Key?"selected":"")>@translator.GetTraduction(service, kv.Value)</option>
+ 					}
+ 				</select>
+ 			</div>
+ 			<div class="fld">
+ 				<label for="robot-lat">@translator.GetTraduction(service,"Latitude")</label>
+ 				<input id="robot-lat" type="text" value="@(Model.Latitud.HasValue? Model.Latitud.Value.ToString("0.######") : "")" />
+ 			</div>
+ 			<div class="fld">
+ 				<label for="robot-lon">@translator.GetTraduction(service,"Longitude")</label>
+ 				<input id="robot-lon" type="text" value="@(Model.Longitud.HasValue? Model.Longitud.Value.ToString("0.######") : "")" />
+ 			</div>
+ 		</div>
+ 		<div class="actions">
+ 			<button class="btn btn-secondary" type="button" onclick="closeRobotModal()">@translator.GetTraduction(service,"Cancel")</button>
+ 			<button class="btn" type="button" onclick="saveRobot()">@translator.GetTraduction(service,"Save")</button>
+ 		</div>
+ 	</div>
  </div>
+
  <!-- Modal editar tarea -->
  <div id="taskModal" class="modal-backdrop">
  	<div class="modal" role="dialog" aria-modal="true">

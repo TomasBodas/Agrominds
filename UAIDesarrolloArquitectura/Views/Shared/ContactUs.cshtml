@@ -116,7 +116,7 @@
                 </div>
             </div>
             <div class="card">
-                <form method="post" action="@Url.Action("SendContact","Home")">
+                <form id="contactus-form" method="post" action="@Url.Action("SendContact","Home")">
                     <label for="name">@translator.GetTraduction(service, "Name")</label>
                     <input type="text" id="name" name="name" required />
                     <label for="email">Email</label>
@@ -130,5 +130,19 @@
     </main>
 </div>
 <footer style="background-color:#2E7D32; color:white; padding:10px; text-align:center;">©2026 AgroMinds — @translator.GetTraduction(service, "AllRightsReserved")</footer>
+<script src="~/Scripts/scriptIdioma.js"></script>
+<script>
+ (function(){
+ var f=document.getElementById('contactus-form');
+ if(f){
+ f.addEventListener('submit', function(e){
+ e.preventDefault();
+ alert('Mensaje enviado');
+ try{ f.reset(); }catch(_){ }
+ return false;
+ });
+ }
+ })();
+</script>
 </body>
 </html>
