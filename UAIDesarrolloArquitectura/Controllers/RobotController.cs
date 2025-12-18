@@ -9,6 +9,7 @@ namespace UAIDesarrolloArquitectura.Controllers
 	public class RobotController : Controller
 	{
 		private readonly BLL_Robot _bll = new BLL_Robot();
+		private static readonly string DeviceApiKey = System.Configuration.ConfigurationManager.AppSettings["DeviceApiKey"] ?? "";
 
 		private bool HasRobotPermission()
 		{
@@ -23,6 +24,12 @@ namespace UAIDesarrolloArquitectura.Controllers
 				return new HttpStatusCodeResult(403, "Permiso insuficiente");
 			}
 			return null;
+		}
+
+		private bool HasDeviceApiKey()
+		{
+			var key = Request.Headers["X-Api-Key"];
+			return !string.IsNullOrEmpty(key) && string.Equals(key, DeviceApiKey, StringComparison.Ordinal);
 		}
 
 		// GET: /Robot
@@ -126,7 +133,10 @@ namespace UAIDesarrolloArquitectura.Controllers
 		{
 			try
 			{
-				var forbid = ForbidIfNoPermission(); if (forbid != null) return forbid;
+				if (!HasDeviceApiKey())
+				{
+					var forbid = ForbidIfNoPermission(); if (forbid != null) return forbid;
+				}
 				int userId = Services.SessionManager.IsLogged() ? Services.SessionManager.GetInstance.User.id :0;
 				_bll.CambiarEstado(id, newState, userId);
 				return Json(new { success = true });
@@ -177,7 +187,11 @@ namespace UAIDesarrolloArquitectura.Controllers
 		{
 			try
 			{
-				var forbid = ForbidIfNoPermission(); if (forbid != null) return forbid;
+				// Permitir dispositivos con API key, o usuario con permiso
+				if (!HasDeviceApiKey())
+				{
+					var forbid = ForbidIfNoPermission(); if (forbid != null) return forbid;
+				}
 				int userId = Services.SessionManager.IsLogged() ? Services.SessionManager.GetInstance.User.id :0;
 				_bll.RegistrarTelemetria(telemetria, true, userId);
 				return Json(new { success = true });
@@ -264,6 +278,29 @@ namespace UAIDesarrolloArquitectura.Controllers
 			{
 				return Json(new { success = false, error = ex.Message }, JsonRequestBehavior.AllowGet);
 			}
+		}
+
+		// GET: /Robot/BatterySnapshot
+		[HttpGet]
+		public ActionResult BatterySnapshot()
+		{
+			var forbid = ForbidIfNoPermission(); if (forbid != null) return forbid;
+			var robots = _bll.GetRobotsForCurrentUser();
+			var data = robots.Select(r => new { id = r.Id, bateria = r.Bateria }).ToList();
+			return Json(new { success = true, data }, JsonRequestBehavior.AllowGet);
+		}
+
+		// GET: /Robot/Battery
+		[HttpGet]
+		public ActionResult Battery(int id)
+		{
+			var forbid = ForbidIfNoPermission(); if (forbid != null) return forbid;
+			// Validar acceso al robot
+			var robots = _bll.GetRobotsForCurrentUser();
+			if (robots.All(r => r.Id != id)) return new HttpStatusCodeResult(403, "Acceso denegado");
+			var robot = robots.FirstOrDefault(r => r.Id == id) ?? _bll.GetRobotById(id);
+			if (robot == null) return HttpNotFound();
+			return Json(new { success = true, bateria = robot.Bateria }, JsonRequestBehavior.AllowGet);
 		}
 	}
 }

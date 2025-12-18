@@ -150,9 +150,9 @@
                                     <h3>@r.Nombre</h3>
                                     <p><strong>@translator.GetTraduction(service, "State"):</strong> <span class="status-pill status-@estadoClass">@estadoNombreTraducido</span></p>
                                     <p><strong>@translator.GetTraduction(service, "Battery"):</strong></p>
-                                    <div class="battery-wrap @(bateriaPct<=15?"battery-low":"")">
-                                        <div class="battery-bar"><div class="battery-fill" style="width:@bateriaPct%;"></div></div>
-                                        <span class="battery-label">@bateriaPct%</span>
+                                    <div class="battery-wrap @(bateriaPct<=15?"battery-low":"")" id="battery-wrap-@r.Id">
+                                        <div class="battery-bar"><div class="battery-fill" id="battery-fill-@r.Id" style="width:@bateriaPct%;"></div></div>
+                                        <span class="battery-label" id="battery-label-@r.Id">@bateriaPct%</span>
                                     </div>
                                 </div>
                                 <div class="robot-actions">
@@ -266,6 +266,28 @@
                 if (nw !== cf) { alert('Las contraseñas no coinciden'); return; }
                 post('/Login/ChangePassword', { currentPassword: cur, newPassword: nw }).then(function (resp) { if (resp.success) { alert('Contraseña cambiada'); closeChangePasswordModal(); } else { alert(resp.error || 'Error'); } });
             };
+
+            // Live update de baterías en listado
+            function clamp(n){ return n <0 ?0 : (n >100 ?100 : n); }
+            function applyBattery(id, val){
+                var pct = clamp(parseInt(val));
+                var fill = document.getElementById('battery-fill-'+id);
+                var label = document.getElementById('battery-label-'+id);
+                var wrap = document.getElementById('battery-wrap-'+id);
+                if(fill){ fill.style.width = pct + '%'; }
+                if(label){ label.textContent = pct + '%'; }
+                if(wrap){ if(pct <=15){ wrap.classList.add('battery-low'); } else { wrap.classList.remove('battery-low'); } }
+            }
+            function refreshBatteries(){
+                if(document.hidden) return; // no hacer fetch si pestaña no visible
+                fetch('/Robot/BatterySnapshot').then(function(r){ return r.json(); }).then(function(resp){
+                    if(!resp || !resp.success) return;
+                    (resp.data||[]).forEach(function(x){ applyBattery(x.id, x.bateria); });
+                }).catch(function(){});
+            }
+            // primera carga y cada10s
+            refreshBatteries();
+            setInterval(refreshBatteries,10000);
         })();
     </script>
 </body></html>
